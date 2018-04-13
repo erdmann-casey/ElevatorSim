@@ -50,9 +50,9 @@ class ElevatorSystem(object):
 
     def start_elevator_system(self):
         #self.elevCar.start()
-        self.elevController.start()
+        #self.elevController.start()
         self.requestProc.start()
-        self.doorStatusProc.start()
+        #self.doorStatusProc.start()
         for floor in self.floors:
             floor.start()
 
@@ -142,14 +142,25 @@ class ElevatorSystem(object):
 
     def main(self):
         self.action_menu()
-        #self.elevCar.join()
-        self.elevController.join()
-        self.requestProc.join()
-        self.doorStatusProc.join()
+        # if self.elevCar.is_alive():
+            # self.elevCar.terminate()
+            # self.elevCar.join()
+        if self.elevController.is_alive():
+            self.elevController.terminate()
+            self.elevController.join()
+        if self.requestProc.is_alive():
+            self.requestProc.terminate()
+            self.requestProc.join()
+        if self.doorStatusProc.is_alive():
+            self.doorStatusProc.terminate()
+            self.doorStatusProc.join()
         for floor in self.floors:
-            floor.join()
+            if floor.is_alive():
+                floor.terminate()
+                floor.join()
 
 
 if __name__ == '__main__':
     es = ElevatorSystem(5)
     es.main()
+
