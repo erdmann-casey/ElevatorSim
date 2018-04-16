@@ -3,6 +3,9 @@ import sys
 from multiprocessing import Pipe
 from ElevatorCar import ElevatorCar
 from CarCtrl import CarCtrl
+from CarDoor import CarDoor
+from CarBtn import CarBtn
+from Motor import Motor
 from ElevatorComponent import ElevatorComponent
 from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
@@ -23,8 +26,14 @@ class ElevatorSystem(object):
         # Special Instation for Elevator Car to handle dependencies for inner communication
         self.elevCar = ElevatorCar(None)
         self.elevCarCtrl = CarCtrl(None, None, None)
+        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
+        self.elevCarBtn = CarBtn(self.elevCar)
+        self.elevCarMotor = Motor(self.elevCarCtrl)
 
         self.elevCar.ctrl = self.elevCarCtrl
+        self.elevCarCtrl.car = self.elevCar
+        self.elevCarCtrl.door = self.elevCarDoor
+        self.elevCarCtrl.motor = self.elevCarMotor
 
         self.floors = [Floor(num) for num in range(num_floors)]
 
