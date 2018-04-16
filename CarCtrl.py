@@ -49,6 +49,14 @@ class CarCtrl(ElevatorComponent):
         self.curFloor = 0
         self.destFloor = 0
 
+        self.doorStatus = "closed"
+
+        self.operating = False
+
+        self.motorStatus = False
+
+
+
         pass
 
     def state_processor(self):
@@ -61,7 +69,7 @@ class CarCtrl(ElevatorComponent):
                 
                 # in ? en && cmdCar == MOVE
                     # Above Met: MoveTo STATE.PREP_TO_CLOSE
-                if(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
+                elif(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
                     self.state = STATE.PREP_TO_CLOSE
                 pass
             
@@ -110,7 +118,7 @@ class CarCtrl(ElevatorComponent):
                     self.state = STATE.MOVE_FWD
                 # in ? msg && cmdCar == Down
                     # Above Met: MoveTo STATE.MOVE_BCK
-                if(self.IN.contents['content'] == CommandCar.CAR_DOWN):
+                elif(self.IN.contents['content'] == CommandCar.CAR_DOWN):
                     self.state = STATE.MOVE_BCK               
                 pass
             elif self.state == STATE.MOVE_FWD:
@@ -132,18 +140,28 @@ class CarCtrl(ElevatorComponent):
             elif self.state == STATE.MOVING:
                 # in ? MsgCar && cmdCar == DOWN && statusDoor == CLOSED && operating == true && motor_running == false
                     # Above Met: MoveTo STATE.WAIT_TO_MOVE
+                if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == "closed" and self.operating and not self.motorStatus):
+                    self.state = STATE.WAIT_TO_MOVE
                 # in ? MsgCar && cmdCar == UP && statusDoor == CLOSED && operating == true && motor_running == false
                     # Above Met: MoveTo STATE.WAIT_TO_MOVE
+                elif(self.IN.contents['content'] == CommandCar.CAR_UP and self.doorStatus == "closed" and self.operating and not self.motorStatus):
+                    self.state = STATE.WAIT_TO_MOVE
                 # iMotor ? MsgMotor pos==dest
                     # Above Met: MoveTo STATE.REACHED
+                elif(self.iMotor and self.curFloor == self.destFloor):
+                    self.state = STATE.REACHED
                 pass
             elif self.state == STATE.REACHED:
                 # MsgCar -> oSt
+                self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 # MoveTo STATE.WAIT_TO_OPEN
+                self.state = STATE.WAIT_TO_OPEN
                 pass
             elif self.state == STATE.WAIT_TO_OPEN:
                 # in ? msg && cmdDoor == OPEN
                     # Above Met: MoveTo STATE.OPENING_DOOR
+                if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+                    self.state = STATE.OPENING_DOOR
                 pass
 
         pass
