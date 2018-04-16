@@ -29,25 +29,29 @@ class StatusCar(Status):
 
 
 class MsgCar(Msg):
-    pass
+
+ def __init__(self, content, pos, dest, isCommand):
+        self.contents = {"content": content, "pos": pos, "dest": dest, "isCommand": isCommand}
+    
 
 
 class CommandDoor(Command):
     DOOR_FLOOR_X_OPEN = "DoorFloorXOPEN"
     DOOR_FLOOR_X_CLOSE = "DoorFloorXCLOSE"
-    DOOR_CAR_X_OPEN = "DoorCarXOPEN"
-    DOOR_CAR_X_CLOSE = "DoorCarXCLOSE"
+    DOOR_CAR_OPEN = "DoorCarOPEN"
+    DOOR_CAR_CLOSE = "DoorCarCLOSE"
 
 
 class StatusDoor(Status):
     DOOR_FLOOR_OPENED = "DoorFloorXOPENED"
     DOOR_FLOOR_CLOSED = "DoorFloorXCLOSED"
-    DOOR_CAR_OPENED = "DoorCarXOPENED"
-    DOOR_CAR_CLOSED = "DoorCarXCLOSED"
+    DOOR_CAR_OPENED = "DoorCarOPENED"
+    DOOR_CAR_CLOSED = "DoorCarCLOSED"
 
 
 class MsgDoor(Msg):
-    pass
+    def __init__(self, content, floor_id, isCommand):
+        self.contents = {"content": content, "id": floor_id, "isCommand": isCommand}
 
 
 class CommandMotor(Command):
@@ -62,7 +66,9 @@ class StatusMotor(Status):
 
 
 class MsgMotor(Msg):
-    pass
+    def __init__(self, content):
+        self.contents = {"content": content}
+
 
 
 class CommandReq(Command):
@@ -71,7 +77,9 @@ class CommandReq(Command):
 
 
 class MsgReq(Msg):
-    pass
+    
+    def __init__(self, dest):
+        self.contents = {"CommandDest": dest}
 
 
 class CommandElev(Command):
@@ -91,4 +99,4 @@ class CommandFloor(Command):
 class MsgFloor(Msg):
 
     def __init__(self, content, floor_id):
-        self.contents = {"content": content, "id": floor_id}
+        self.contents = {"CommandDoor": content, "id": floor_id}

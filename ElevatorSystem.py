@@ -1,7 +1,8 @@
 import sys
 
 from multiprocessing import Pipe
-# from ElevatorCar import CarCtrl, Motor, CarBtn, CarDoor
+from ElevatorCar import ElevatorCar
+from CarCtrl import CarCtrl
 from ElevatorComponent import ElevatorComponent
 from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
@@ -18,6 +19,13 @@ class ElevatorSystem(object):
         self.elevController = ElevatorController()
         self.requestProc = RequestProcessor()
         self.doorStatusProc = DoorStatusProcessor()
+        
+        # Special Instation for Elevator Car to handle dependencies for inner communication
+        self.elevCar = ElevatorCar(None)
+        self.elevCarCtrl = CarCtrl(None, None, None)
+
+        self.elevCar.ctrl = self.elevCarCtrl
+
         self.floors = [Floor(num) for num in range(num_floors)]
 
         # setup pipes, output->input
@@ -30,8 +38,14 @@ class ElevatorSystem(object):
         """self.elevController.oCmdCar, self.elevCar.iCmd = Pipe()"""
         # Setup Floor pipes separately, skipping self.elevController.oCmdFloor...
         self.elevController.out, self.doorStatusProc.input = Pipe()
-        self.requestProc.out, self.elevController.iReq, Pipe()
+        self.requestProc.out, self.elevController.iReq = Pipe()
         self.doorStatusProc.out, self.elevController.iReq = Pipe()
+        
+        self.elevCar.iCmd, self.elevController.oCmdCar = Pipe()
+        self.elevCar.oReq, self.requestProc.input = Pipe()
+        self.elevCar.oStCar, self.elevController.iStCar = Pipe()
+        self.elevCar.oStDoor, self.doorStatusProc.iStCar = Pipe()
+        
         for num in range(num_floors):
             # Floor Pipes...
             self.floors[num].iCmd, self.elevController.oCmdFloor = Pipe()
