@@ -33,10 +33,14 @@ class Motor(ElevatorComponent):
             if self.state == STATE.PASSIVE:
                 # in ? job && job != null 
                     # Above Met: MoveTo STATE.BUSY
+                if(self.IN.contents['content'] == StatusMotor.MOTOR_MOVING):
+                    self.state = STATE.BUSY
                 pass
             elif self.state == STATE.BUSY:
                 # Send message MsgMotor -> OUT
+                self.OUT = MsgMotor(StatusMotor.MOTOR_MOVING)
                 # MoveTo STATE.PASSIVE
+                self.state = STATE.PASSIVE
                 pass
             
 

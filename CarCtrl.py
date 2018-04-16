@@ -49,11 +49,11 @@ class CarCtrl(ElevatorComponent):
         self.curFloor = 0
         self.destFloor = 0
 
-        self.doorStatus = "closed"
+        self.doorStatus = StatusDoor.DOOR_CAR_CLOSED
 
         self.operating = False
 
-        self.motorStatus = False
+        self.motorStatus = StatusMotor.MOTOR_REACHED
 
 
 
@@ -61,6 +61,18 @@ class CarCtrl(ElevatorComponent):
 
     def state_processor(self):
         while True:
+
+            if(isinstance(self.IN, MsgCar)):
+                self.curFloor = self.IN.contents['pos']
+                self.destFloor = self.IN.contents['dest']
+            
+            if(self.iDoor):
+                self.doorStatus = self.iDoor.contents['content']
+            
+            if(self.iMotor):
+                self.motorStatus = self.iMotor.contents['content']
+
+
             if self.state == STATE.IDLE:
                 # in ? msgDoor && cmdDoor == OPEN 
                     # Above Met: MoveTo STATE.OPENING_DOOR
@@ -71,6 +83,10 @@ class CarCtrl(ElevatorComponent):
                     # Above Met: MoveTo STATE.PREP_TO_CLOSE
                 elif(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
                     self.state = STATE.PREP_TO_CLOSE
+
+                # Elevator Car is idle, set operating to False
+                self.operating = False
+
                 pass
             
             elif self.state == STATE.OPENING_DOOR:
@@ -80,6 +96,8 @@ class CarCtrl(ElevatorComponent):
                 self.oSt = MsgCar(StatusCar.CAR_OPENING, self.curFloor, self.destFloor, False)
                 # MoveTo STATE.CONFIRM_OPEN
                 self.state = STATE.CONFIRM_OPEN
+                # Elevator Car is no longer in IDLE, set operating to True
+                self.operating = True
                 pass
             elif self.state == STATE.CONFIRM_OPEN:
                 # iDoor ? msg && statusDoor == OPENED
@@ -97,6 +115,8 @@ class CarCtrl(ElevatorComponent):
                 self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 # MoveTo STATE.CONFIRM_CLOSE
                 self.state = STATE.CONFIRM_CLOSE
+                # Elevator Car is no longer in IDLE, set operating to True
+                self.operating = True
                 pass
             elif self.state == STATE.CONFIRM_CLOSE:
                 # iDoor ? msg && statusDoor == CLOSE && inProcess
@@ -140,11 +160,11 @@ class CarCtrl(ElevatorComponent):
             elif self.state == STATE.MOVING:
                 # in ? MsgCar && cmdCar == DOWN && statusDoor == CLOSED && operating == true && motor_running == false
                     # Above Met: MoveTo STATE.WAIT_TO_MOVE
-                if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == "closed" and self.operating and not self.motorStatus):
+                if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
                     self.state = STATE.WAIT_TO_MOVE
                 # in ? MsgCar && cmdCar == UP && statusDoor == CLOSED && operating == true && motor_running == false
                     # Above Met: MoveTo STATE.WAIT_TO_MOVE
-                elif(self.IN.contents['content'] == CommandCar.CAR_UP and self.doorStatus == "closed" and self.operating and not self.motorStatus):
+                elif(self.IN.contents['content'] == CommandCar.CAR_UP and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
                     self.state = STATE.WAIT_TO_MOVE
                 # iMotor ? MsgMotor pos==dest
                     # Above Met: MoveTo STATE.REACHED
