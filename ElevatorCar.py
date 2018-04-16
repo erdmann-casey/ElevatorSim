@@ -36,7 +36,7 @@ class ElevatorCar(ElevatorComponent):
             # Get iCmd
             try:
                 job = self.iCmd.recv()
-                self.ctrl.IN(job)
+                self.ctrl.IN = job
             except EOFError:
                 pass
 
