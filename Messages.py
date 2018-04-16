@@ -29,7 +29,10 @@ class StatusCar(Status):
 
 
 class MsgCar(Msg):
-    pass
+
+ def __init__(self, content, pos, dest, isCommand):
+        self.contents = {"content": content, "pos": pos, "dest": dest, "isCommand": isCommand}
+    
 
 
 class CommandDoor(Command):
@@ -47,8 +50,8 @@ class StatusDoor(Status):
 
 
 class MsgDoor(Msg):
-    def __init__(self, content, floor_id):
-        self.contents = {"content": content, "id": floor_id}
+    def __init__(self, content, floor_id, isCommand):
+        self.contents = {"content": content, "id": floor_id, "isCommand": isCommand}
 
 
 class CommandMotor(Command):
@@ -63,7 +66,9 @@ class StatusMotor(Status):
 
 
 class MsgMotor(Msg):
-    pass
+    def __init__(self, content):
+        self.contents = {"content": content}
+
 
 
 class CommandReq(Command):
