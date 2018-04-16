@@ -13,6 +13,11 @@ class ElevatorCar(ElevatorComponent):
         self.oStCar = None # Recipient is Elevator Controller
         self.oStDoor = None # Recipient is Door Status Processor
 
+        # Instance variables to store the actual message objects that will be sent via Pipes
+        self.oReqMsg = None
+        self.oStCarMsg = None
+        self.oStDoorMsg = None
+
         # Coupled Input/Output: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
         self.ctrl = CarCtrl
 
@@ -24,14 +29,17 @@ class ElevatorCar(ElevatorComponent):
     def main(self):
         while True:
             # Send output
-            if(self.oReq):
+            if(self.oReqMsg):
                 # Send oReq
+                self.oReq.send(self.oReqMsg)
                 pass
-            if(self.oStCar):
+            if(self.oStCarMsg):
                 # Send oStCar
+                self.oStCar.send(self.oStCarMsg)
                 pass
-            if(self.oStDoor):
+            if(self.oStDoorMsg):
                 # Send oStDoor
+                self.oStDoor.send(self.oStDoorMsg)
                 pass
             # Get iCmd
             try:
@@ -44,5 +52,5 @@ class ElevatorCar(ElevatorComponent):
 
 if __name__ == '__main__':
     ctrl = None
-    ec = ElevatorCar(ctrl)
-    ec.main()
+    car = ElevatorCar(ctrl)
+    car.main()

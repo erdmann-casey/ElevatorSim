@@ -17,8 +17,15 @@ class CarBtn(ElevatorComponent):
 
     def press(self, id):
         # Send Message MsgReq -> OUT
-        pass
+        msg = MsgReq(id)
 
+        self.car.oReqMsg = msg
+
+        pass
+    
+    def state_processor(self):
+        pass
+        
     def main(self):
         pass
     

@@ -72,7 +72,9 @@ class CommandReq(Command):
 
 
 class MsgReq(Msg):
-    pass
+    
+    def __init__(self, dest):
+        self.contents = {"CommandDest": dest}
 
 
 class CommandElev(Command):
