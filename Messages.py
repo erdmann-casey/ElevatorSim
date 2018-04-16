@@ -35,19 +35,20 @@ class MsgCar(Msg):
 class CommandDoor(Command):
     DOOR_FLOOR_X_OPEN = "DoorFloorXOPEN"
     DOOR_FLOOR_X_CLOSE = "DoorFloorXCLOSE"
-    DOOR_CAR_X_OPEN = "DoorCarXOPEN"
-    DOOR_CAR_X_CLOSE = "DoorCarXCLOSE"
+    DOOR_CAR_OPEN = "DoorCarOPEN"
+    DOOR_CAR_CLOSE = "DoorCarCLOSE"
 
 
 class StatusDoor(Status):
     DOOR_FLOOR_OPENED = "DoorFloorXOPENED"
     DOOR_FLOOR_CLOSED = "DoorFloorXCLOSED"
-    DOOR_CAR_OPENED = "DoorCarXOPENED"
-    DOOR_CAR_CLOSED = "DoorCarXCLOSED"
+    DOOR_CAR_OPENED = "DoorCarOPENED"
+    DOOR_CAR_CLOSED = "DoorCarCLOSED"
 
 
 class MsgDoor(Msg):
-    pass
+    def __init__(self, content, floor_id):
+        self.contents = {"content": content, "id": floor_id}
 
 
 class CommandMotor(Command):
@@ -91,4 +92,4 @@ class CommandFloor(Command):
 class MsgFloor(Msg):
 
     def __init__(self, content, floor_id):
-        self.contents = {"content": content, "id": floor_id}
+        self.contents = {"CommandDoor": content, "id": floor_id}

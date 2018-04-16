@@ -1,7 +1,7 @@
 import sys
 
 from multiprocessing import Pipe
-# from ElevatorCar import CarCtrl, Motor, CarBtn, CarDoor
+from ElevatorCar import ElevatorCar
 from ElevatorComponent import ElevatorComponent
 from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
