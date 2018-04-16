@@ -37,7 +37,7 @@ class CarCtrl(ElevatorComponent):
         self.oMotor = None # Recipient is Motor
         self.oSt = None # Recipient is Elevator Car
 
-        # Coupled Input: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
+        # Coupled Input/Output: Multiple outs to an instance of the CarDoor, the Motor, and the Elevator Car itself
         self.door = CarDoor
         self.motor = Motor
         self.car = ElevatorCar

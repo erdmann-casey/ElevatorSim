@@ -13,7 +13,7 @@ class ElevatorCar(ElevatorComponent):
         self.oStCar = None # Recipient is Elevator Controller
         self.oStDoor = None # Recipient is Door Status Processor
 
-        # Coupled Input: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
+        # Coupled Input/Output: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
         self.ctrl = CarCtrl
 
         pass
