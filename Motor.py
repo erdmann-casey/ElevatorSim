@@ -1,5 +1,6 @@
 from ElevatorComponent import ElevatorComponent
 from Messages import *
+from time import time
 
 class STATE(Enum):
     """
@@ -11,7 +12,7 @@ class STATE(Enum):
 
 class Motor(ElevatorComponent):
     
-    def __init__(self, CarCtrl):
+    def __init__(self, CarCtrl, system_time):
         super().__init__()
         # input
         self.IN = None    # Received from Car Controller
@@ -25,6 +26,9 @@ class Motor(ElevatorComponent):
         # component vars
         self.state = STATE.PASSIVE # initialize in PASSIVE state
     
+        self.system_time = system_time
+
+        self.motor_time = time()
 
         pass
 
@@ -35,10 +39,27 @@ class Motor(ElevatorComponent):
                     # Above Met: MoveTo STATE.BUSY
                 if(self.IN.contents['content'] == StatusMotor.MOTOR_MOVING):
                     self.state = STATE.BUSY
+                    # Generate oReq log
+                    sim_time = str(time() - self.system_time)
+                    motor_run_time = str(time() - self.motor_time)
+                    
+                    log = sim_time + "," + motor_run_time + ",Motor,C" + str(self.IN.contents)
+
+                    print(log)
                 pass
             elif self.state == STATE.BUSY:
                 # Send message MsgMotor -> OUT
                 self.OUT = MsgMotor(StatusMotor.MOTOR_MOVING)
+
+                self.ctrl.setiMotor(self.OUT)
+
+                # Generate oReq log
+                sim_time = str(time() - self.system_time)
+                motor_run_time = str(time() - self.motor_time)
+                    
+                log = sim_time + "," + motor_run_time + ",Motor, Elevator Ctrl,S" + str(self.OUT.contents)
+
+                print(log)
                 # MoveTo STATE.PASSIVE
                 self.state = STATE.PASSIVE
                 pass
@@ -52,5 +73,5 @@ class Motor(ElevatorComponent):
     
 if __name__ == '__main__':
     ctrl = None
-    motor = Motor(ctrl)
+    motor = Motor(ctrl, time())
     motor.main()
