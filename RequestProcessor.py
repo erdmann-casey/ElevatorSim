@@ -2,6 +2,7 @@ from multiprocessing import Queue
 
 from ElevatorComponent import ElevatorComponent
 from Messages import *
+from threading import Thread
 
 
 class STATE(Enum):
@@ -19,7 +20,9 @@ class RequestProcessor(ElevatorComponent):
         super().__init__()
         # input
         self.input = None
+        self.in_msg = None
         self.next = None
+        self.next_msg = None
         # output
         self.out = None
         # component vars
@@ -31,41 +34,51 @@ class RequestProcessor(ElevatorComponent):
     def state_processor(self):
         while True:
             if self.state is STATE.PASSIVE:
-
-                msg = self.input.recv()  # msg is a Floor Request
-                print(msg.contents)
-                self.q.put(msg)
-                self.job = msg
-
+                self.receive_input()
                 if self.q.empty() and self.job is None:
-                    # Perform necessary actions
                     self.change_state(STATE.PASSIVE)
                 elif not self.q.empty() and self.job is not None:
-                    # Perform necessary actions
                     self.change_state(STATE.SEND_JOB)
+
             elif self.state is STATE.SEND_JOB:
-                # out ! job
                 if not self.q.empty():
-                    # Perform necessary actions
-                    # send a message via self.out
+                    self.job = self.q.get()
+                    self.out.send(self.job)
+                    self.job = None
                     self.change_state(STATE.BUSY)
+
             elif self.state is STATE.BUSY:
-                """
-                if self.done is False or self.q.empty():
-                    # Perform necessary actions
+                if self.next_msg.contents.get("ELEV") is False or self.q.empty():
                     self.change_state(STATE.BUSY)
-                elif self.done is True and not self.q.empty():
-                    # Perform necessary actions
+
+                elif self.next_msg.contents.get("ELEV") is True and not self.q.empty():
                     self.change_state(STATE.SEND_JOB)
-                elif self.sendNext is not None and not self.q.empty():
+
+                elif self.receive_next() and self.next_msg.contents.get("ELEV") is not None and not self.q.empty():
                     # Perform necessary actions
                     # next ? sendNext
                     self.change_state(STATE.SEND_JOB)
-                elif self.job is not None and not self.q.empty() and self.done is True:
+
+                elif self.job is not None and not self.q.empty() and self.next_msg.contents.get("ELEV") is True:
                     # Perform necessary actions
                     # in ? job in q
                     self.change_state(STATE.SEND_JOB)
-                """
+
+    def receive_input(self):
+        if self.input.poll():
+            self.in_msg = self.input.recv()  # msg is a Floor Request
+            self.q.put(self.in_msg)
+            self.job = self.in_msg
+            return True
+        else:
+            return False
+
+    def receive_next(self):
+        if self.next.poll():
+            self.next_msg = self.next.recv()
+            return True
+        else:
+            return False
 
     def main(self):
         self.state_processor()

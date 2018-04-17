@@ -14,6 +14,7 @@ class ElevatorComponent(Process):
     def __init__(self):
         super().__init__()
         self.state = STATE.NONE
+        self.state_comm = None
         pass
 
     def run(self):
@@ -21,6 +22,13 @@ class ElevatorComponent(Process):
 
     def change_state(self, next_state):
         self.state = next_state
+
+    def state_communication(self):
+        while True:
+            bSendState = self.state_comm.recv()
+            if bSendState is True:
+                self.state_comm.send(self.state)
+
 
     @abstractmethod
     def state_processor(self): raise NotImplementedError

@@ -34,7 +34,6 @@ class MsgCar(Msg):
         self.contents = {"content": content, "pos": pos, "dest": dest, "isCommand": isCommand}
     
 
-
 class CommandDoor(Command):
     DOOR_FLOOR_X_OPEN = "DoorFloorXOPEN"
     DOOR_FLOOR_X_CLOSE = "DoorFloorXCLOSE"
@@ -47,6 +46,8 @@ class StatusDoor(Status):
     DOOR_FLOOR_CLOSED = "DoorFloorXCLOSED"
     DOOR_CAR_OPENED = "DoorCarOPENED"
     DOOR_CAR_CLOSED = "DoorCarCLOSED"
+    DOOR_BOTH_OPEN = "DoorCarFloorOPENED"
+    DOOR_BOTH_CLOSED = "DoorCarFloorCLOSED"
 
 
 class MsgDoor(Msg):
@@ -70,9 +71,7 @@ class MsgMotor(Msg):
         self.contents = {"content": content}
 
 
-
 class CommandReq(Command):
-
     pass
 
 

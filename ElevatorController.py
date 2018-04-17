@@ -25,8 +25,11 @@ class ElevatorController(ElevatorComponent):
         super().__init__()
         # input
         self.iReq = None     # Received from Request Processor
+        self.iReq_msg = None
         self.iStCar = None   # Received from Elevator Car
+        self.iStCar_msg = None
         self.iStDoor = None  # Received from Door Status Processor
+        self.iStDoor_msg = None
         # output
         self.oCmdCar = None    # Recipient is Elevator Car
         self.oCmdFloor = None  # Recipient is Floor(s)
@@ -37,74 +40,107 @@ class ElevatorController(ElevatorComponent):
         self.destFloor = None   # int
         self.isGoUp = None      # boolean
         self.isGoDown = None    # boolean
-        self.operating = None   # boolean
+        self.isOperating = None   # boolean
         self.statusDoor = None  # string
         self.statusCar = None   # string
+        self.reset = False      # boolean, otherwise known as "mode" or "reset mode"
         self.state = STATE.IDLE
+
+    def receive_iReq(self):
+        if self.iReq.poll():
+            self.iReq_msg = self.iReq.recv()
+            return True
+        else:
+            return False
+
+    def receive_iStCar(self):
+        if self.iStCar.poll():
+            self.iStCar_msg = self.iStCar.recv()
+            return True
+        else:
+            return False
+
+    def receive_iStDoor(self):
+        if self.iStDoor.poll():
+            self.iStDoor_msg = self.iStDoor.recv()
+            return True
+        else:
+            return False
 
     def state_processor(self):
         while True:
             if self.state is STATE.IDLE:
-                # iReq ? cmdReq
-                # [!isOperating && mode == true]
-                    # Above Met: MoveTo STATE.MOVE
-                # iReq ? cmdReq
-                # [!isOperating && mode == false]
-                    # Above Met: MoveTo STATE.STOP
-                pass
+                if self.receive_iReq():
+                    if not self.isOperating and self.reset is True:
+                        self.change_state(STATE.MOVE)
+                    elif not self.isOperating and self.reset is False:
+                        self.change_state(STATE.STOP)
+
             if self.state is STATE.MOVE:
                 # oCmdCar   !  msgCar
                 # oCmdFloor !  msgFloor
                 # out       !  msgElev
                     # Above Met: MoveTo STATE.WAIT_FOR_CAR_READY
                 pass
+
             if self.state is STATE.WAIT_FOR_CAR_READY:
-                # iStDoor ?  msgDoor
-                # iStCar  ?  msgCar
-                # [door == closed && Car == readyToMove && isGoUp]
-                    # Above Met: MoveTo STATE.MOVE_UP
-                # iStDoor ?  msgDoor
-                # iStCar  ?  msgCar
-                # [door == closed && Car == readyToMove && isGoDown]
-                    # Above Met: MoveTo STATE.MOVE_DOWN
-                pass
+                if self.iStDoor.poll() and self.iStCar.poll():
+                    self.receive_iStDoor()
+                    self.receive_iStCar()
+                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_CAR_CLOSED and self.iStCar_msg.contents.get("content") is StatusCar.CAR_READY_TO_MOVE and self.isGoUp:
+                        self.change_state(STATE.MOVE_UP)
+                    elif self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_CAR_CLOSED and self.iStCar_msg.contents.get("content") is StatusCar.CAR_READY_TO_MOVE and self.isGoDown:
+                        self.change_state(STATE.MOVE_DOWN)
+
             if self.state is STATE.MOVE_UP:
                 # oCmdCar !  msgCar
                     # Above Met: MoveTo STATE.MOVING_UP
                 pass
+
             if self.state is STATE.MOVE_DOWN:
                 # oCmdCar !  msgCar
                     # Above Met: MoveTo STATE.MOVING_DOWN
                 pass
+
             if self.state is STATE.MOVING_UP:
-                # iStDoor ?  msgDoor
-                # iStCar  ?  msgCar
-                # [door == closed && Car == stopped && !isGoUp && !isGoDown]
-                    # Above Met: MoveTo STATE.STOP
-                pass
+                if self.iStDoor.poll() and self.iStCar.poll():
+                    self.iStDoor_msg = self.receive_iStDoor()
+                    self.iStCar_msg = self.receive_iStCar()
+                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") is StatusCar.CAR_STOPPED and not self.isGoUp and not self.isGoDown:
+                        self.change_state(STATE.STOP)
+
             if self.state is STATE.MOVING_DOWN:
-                # iStDoor ?  msgDoor
-                # iStCar  ?  msgCar
-                # [door == closed && Car == stopped && !isGoUp && !isGoDown]
-                    # Above Met: MoveTo STATE.STOP
-                pass
+                if self.iStDoor.poll() and self.iStCar.poll():
+                    self.iStDoor_msg = self.receive_iStDoor()
+                    self.iStCar_msg = self.receive_iStCar()
+                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") is StatusCar.CAR_STOPPED and not self.isGoUp and not self.isGoDown:
+                        self.change_state(STATE.STOP)
+
             if self.state is STATE.STOP:
                 # oCmdCar   !  msgDoor
                 # oCmdFloor !  msgDoor
                     # Above Met: MoveTo STATE.WAIT_FOR_CAR_OPEN
                 pass
+
             if self.state is STATE.WAIT_FOR_CAR_OPEN:
-                # iStDoor ? msgDoor
-                # iStCar  ? msgDoor
-                # [door == opened && Car == opening]
-                    # Above Met: MoveTo STATE.WAIT_FOR_CAR_CLOSE
-                pass
+                if self.iStDoor.poll() and self.iStCar.poll():
+                    self.iStDoor_msg = self.receive_iStDoor()
+                    self.iStCar_msg = self.receive_iStCar()
+                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_BOTH_OPEN and self.iStCar_msg.content.get("content") is StatusCar.CAR_OPENING:
+                        self.change_state(STATE.WAIT_FOR_CAR_CLOSE)
+
             if self.state is STATE.WAIT_FOR_CAR_CLOSE:
+                if self.iStDoor.poll() and self.iStCar.poll():
+                    self.iStDoor_msg = self.receive_iStDoor()
+                    self.iStCar_msg = self.receive_iStCar()
+                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.content.get("content") is StatusCar.CAR_STOPPED:
+                        self.change_state(STATE.DONE)
                 # iStDoor ? msgDoor
                 # iStCar  ? msgDoor
                 # [door == closed && Car == stopped]
                     # Above Met: MoveTo STATE.DONE
                 pass
+
             if self.state is STATE.DONE:
                 # oDone !  msgElev
                     # Above Met: MoveTo STATE.IDLE

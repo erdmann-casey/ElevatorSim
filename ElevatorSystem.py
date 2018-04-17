@@ -54,6 +54,9 @@ class ElevatorSystem(object):
         self.elevCar.oReq, self.requestProc.input = Pipe()
         self.elevCar.oStCar, self.elevController.iStCar = Pipe()
         self.elevCar.oStDoor, self.doorStatusProc.iStCar = Pipe()
+
+        # setup pipes to get component states
+        self.requestProc.state_comm, self.rp_pipe = Pipe()
         
         for num in range(num_floors):
             # Floor Pipes...
@@ -73,18 +76,22 @@ class ElevatorSystem(object):
 
     def start_elevator_system(self):
         #self.elevCar.start()
-        #self.elevController.start()
+        self.elevController.start()
         self.requestProc.start()
-        #self.doorStatusProc.start()
+        self.doorStatusProc.start()
         for floor in self.floors:
             floor.start()
 
     def print_component_states(self):
+        """
+        So. Obviously. These are references to the objects, not the processes.
+        So. You know. This doesn't work. Obviously.
+        """
         print("Current States:")
         # print Elevator Car States
-        print("Elevator Controller: {}".format(self.elevController.state.value))
-        print("Request Processor: {}".format(self.requestProc.state.value))
-        print("Door Status Processor: {}".format(self.doorStatusProc.state.value))
+        print("Elevator Controller: {}".format(self.elevController.state))
+        print("Request Processor: {}".format(self.rp_pipe.recv()))
+        print("Door Status Processor: {}".format(self.doorStatusProc.state))
 
     def elevator_menu(self):
         while True:
