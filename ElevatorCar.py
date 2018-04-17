@@ -1,9 +1,10 @@
 from ElevatorComponent import ElevatorComponent
 from Messages import *
+from time import time
 
 class ElevatorCar(ElevatorComponent):
 
-    def __init__(self, CarCtrl):
+    def __init__(self, CarCtrl, system_time):
         super().__init__()
         # input
         self.iCmd = None    # Received from Elevator Controller
@@ -21,6 +22,10 @@ class ElevatorCar(ElevatorComponent):
         # Coupled Input/Output: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
         self.ctrl = CarCtrl
 
+        self.system_time = system_time
+
+        self.elev_car_time = time()
+
         pass
 
     def state_processor(self):
@@ -32,6 +37,15 @@ class ElevatorCar(ElevatorComponent):
             if(self.oReqMsg):
                 # Send oReq
                 self.oReq.send(self.oReqMsg)
+
+                # Generate oReq log
+                sim_time = str(time() - self.system_time)
+                oReq_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + oReq_run_time + ",Elevator Car,Request Proc,S," + str(self.oReqMsg.contents)
+
+                print(log)
+
                 pass
             if(self.oStCarMsg):
                 # Send oStCar
@@ -52,5 +66,5 @@ class ElevatorCar(ElevatorComponent):
 
 if __name__ == '__main__':
     ctrl = None
-    car = ElevatorCar(ctrl)
+    car = ElevatorCar(ctrl, time())
     car.main()

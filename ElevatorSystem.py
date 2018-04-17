@@ -11,12 +11,15 @@ from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
 from DoorStatusProcessor import DoorStatusProcessor
 from Floor import Floor
-
+from time import time
 
 class ElevatorSystem(object):
 
     def __init__(self, num_floors):
         super(ElevatorSystem, self).__init__()
+
+        self.system_time = time()
+
         # initialize components
         """self.elevCar = ElevatorCar()"""
         self.elevController = ElevatorController()
@@ -24,10 +27,10 @@ class ElevatorSystem(object):
         self.doorStatusProc = DoorStatusProcessor()
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
-        self.elevCar = ElevatorCar(None)
+        self.elevCar = ElevatorCar(None, self.system_time)
         self.elevCarCtrl = CarCtrl(None, None, None)
         self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
-        self.elevCarBtn = CarBtn(self.elevCar)
+        self.elevCarBtn = CarBtn(self.elevCar, self.system_time)
         self.elevCarMotor = Motor(self.elevCarCtrl)
 
         self.elevCar.ctrl = self.elevCarCtrl
@@ -127,7 +130,7 @@ class ElevatorSystem(object):
         while True:
             if self.elevController.is_alive() and self.doorStatusProc.is_alive() and self.requestProc.is_alive():
                 print("\n-----All Processes Live!-----\n")
-
+            self.elevCarBtn.press(1)
             print(
                 "\n"
                 "1) Start Elevator System\n"
