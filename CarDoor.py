@@ -1,4 +1,4 @@
-import time
+from time import time, sleep
 from ElevatorComponent import ElevatorComponent
 from Messages import *
 
@@ -14,7 +14,7 @@ class STATE(Enum):
 
 class CarDoor(ElevatorComponent):
     
-    def __init__(self, CarCtrl, ElevatorCar):
+    def __init__(self, CarCtrl, ElevatorCar, system_time):
         super().__init__()
         # input
         self.IN = None    # Received from Car Controller
@@ -32,6 +32,9 @@ class CarDoor(ElevatorComponent):
         self.processing_time = 5.0
         self.motion_time = 3.0
     
+        self.system_time = system_time
+
+        self.door_time = time()
 
         pass
 
@@ -40,28 +43,83 @@ class CarDoor(ElevatorComponent):
             if self.state == STATE.CLOSED:
                 # in ? job && cmdDoor == OPEN
                     # Above Met: MoveTo STATE.OPENING
-                if(self.IN.content['content'] == CommandDoor.DOOR_CAR_OPEN):
+                if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+
+                    # Generate IN log
+                    sim_time = str(time() - self.system_time)
+                    door_run_time = str(time() - self.door_time)
+                        
+                    log = sim_time + "," + door_run_time + ",Elevator Ctrl,Car Door,R" + str(self.IN.contents)
+
+                    print(log)
+
+                    # Generate Component log
+                    sim_time = str(time() - self.system_time)
+                    door_run_time = str(time() - self.door_time)
+                    
+                    log = sim_time + "," + door_run_time + ",,C" + str(self.IN.contents)
+
+                    print(log)
                     self.state = STATE.OPENING
+                    
+
                 # in ? job && cmdDoor == CLOSE
                     # Above Met: MoveTo STATE.CLOSING
-                if(self.IN.content['content'] == CommandDoor.DOOR_CAR_CLOSE):
+                if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_CLOSE):
+
+                    # Generate IN log
+                    sim_time = str(time() - self.system_time)
+                    door_run_time = str(time() - self.door_time)
+                        
+                    log = sim_time + "," + door_run_time + ",Elevator Ctrl,Car Door,R" + str(self.IN.contents)
+
+                    print(log)
+
+                    # Generate Component log
+                    sim_time = str(time() - self.system_time)
+                    door_run_time = str(time() - self.door_time)
+                    
+                    log = sim_time + "," + door_run_time + ",,C" + str(self.IN.contents)
+
+                    print(log)
+
                     self.state = STATE.CLOSING
+                                        
+
                 pass
             elif self.state == STATE.OPENING:
                 # Send message MsgDoor -> OUT
                 self.OUT = MsgDoor(StatusDoor.DOOR_CAR_OPENED, 100, False)
+                self.ctrl.setiDoor(self.OUT)
+                self.car.oStDoorMsg = self.OUT
+                # Generate OUT log
+                sim_time = str(time() - self.system_time)
+                door_run_time = str(time() - self.door_time)
+                        
+                log = sim_time + "," + door_run_time + ",Car Door,Elevator Ctrl,S" + str(self.OUT.contents)
+
+                print(log)
                 # MoveTo STATE.OPENED
                 self.state = STATE.OPENED
                 pass
             elif self.state == STATE.OPENED:
                 # Do some timeout logic, MoveTo STATE.CLOSING
-                time.sleep(self.processing_time)
-                time.sleep(self.motion_time)
+                sleep(self.processing_time)
+                sleep(self.motion_time)
                 self.state = STATE.CLOSING
                 pass
             elif self.state == STATE.CLOSING:
                 # Send message MsgDoor -> OUT
                 self.OUT = MsgDoor(StatusDoor.DOOR_CAR_CLOSED, 100, False)
+                self.ctrl.setiDoor(self.OUT)
+                self.car.oStDoorMsg = self.OUT
+                # Generate OUT log
+                sim_time = str(time() - self.system_time)
+                door_run_time = str(time() - self.door_time)
+                        
+                log = sim_time + "," + door_run_time + ",Car Door,Elevator Ctrl,S" + str(self.OUT.contents)
+
+                print(log)
                 # MoveTo STATE.CLOSED
                 self.state = STATE.CLOSED
                 pass
@@ -76,5 +134,5 @@ class CarDoor(ElevatorComponent):
 if __name__ == '__main__':
     ctrl = None
     car = None
-    door = CarDoor(ctrl, car)
+    door = CarDoor(ctrl, car, time())
     door.main()

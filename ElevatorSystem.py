@@ -28,10 +28,10 @@ class ElevatorSystem(object):
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
         self.elevCar = ElevatorCar(None, self.system_time)
-        self.elevCarCtrl = CarCtrl(None, None, None)
-        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
+        self.elevCarCtrl = CarCtrl(None, None, None, self.system_time)
+        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar, self.system_time)
         self.elevCarBtn = CarBtn(self.elevCar, self.system_time)
-        self.elevCarMotor = Motor(self.elevCarCtrl)
+        self.elevCarMotor = Motor(self.elevCarCtrl, self.system_time)
 
         self.elevCar.ctrl = self.elevCarCtrl
         self.elevCarCtrl.car = self.elevCar
@@ -137,7 +137,7 @@ class ElevatorSystem(object):
         while True:
             if self.elevController.is_alive() and self.doorStatusProc.is_alive() and self.requestProc.is_alive():
                 print("\n-----All Processes Live!-----\n")
-            self.elevCarBtn.press(1)
+
             print(
                 "\n"
                 "1) Start Elevator System\n"

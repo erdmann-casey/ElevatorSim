@@ -1,5 +1,6 @@
 from ElevatorComponent import ElevatorComponent
 from Messages import *
+from time import time
 
 class STATE(Enum):
     """
@@ -25,7 +26,7 @@ class STATE(Enum):
 
 class CarCtrl(ElevatorComponent):
     
-    def __init__(self, CarDoor, Motor, ElevatorCar):
+    def __init__(self, CarDoor, Motor, ElevatorCar, system_time):
         super().__init__()
         # input
         self.iDoor = None    # Received from Car Door
@@ -56,8 +57,33 @@ class CarCtrl(ElevatorComponent):
         self.motorStatus = StatusMotor.MOTOR_REACHED
 
 
+        self.system_time = system_time
+
+        self.ctrl_time = time()
 
         pass
+
+    def setiMotor(self, iMotor):
+        self.iMotor = iMotor
+
+        # Generate iMotor Log
+        sim_time = str(time() - self.system_time)
+        ctrl_run_time = str(time() - self.ctrl_time)
+                    
+        log = sim_time + "," + ctrl_run_time + ",Motor, Elevator Ctrl,R" + str(self.iMotor.contents)
+
+        print(log)
+
+    def setiDoor(self, iDoor):
+        self.iDoor = iDoor
+
+        # Generate iDoor Log
+        sim_time = str(time() - self.system_time)
+        ctrl_run_time = str(time() - self.ctrl_time)
+                    
+        log = sim_time + "," + ctrl_run_time + ",Car Door, Elevator Ctrl,R" + str(self.iDoor.contents)
+
+        print(log)
 
     def state_processor(self):
         while True:
@@ -144,16 +170,32 @@ class CarCtrl(ElevatorComponent):
             elif self.state == STATE.MOVE_FWD:
                 # MsgMotor -> oMotor
                 self.oMotor = MsgMotor(CommandMotor.MOTOR_FORWARD)
+
+                # Generate oMotor Log
+                sim_time = str(time() - self.system_time)
+                ctrl_run_time = str(time() - self.ctrl_time)
+                    
+                log = sim_time + "," + ctrl_run_time + ",Elevator Ctrl,Motor,S" + str(self.oMotor.contents)
+
+                print(log)
                 # MsgCar -> oSt
-                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
+                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor + 1, self.destFloor, False)
                 # MoveTo STATE.MOVING
                 self.state = STATE.MOVING
                 pass
             elif self.state == STATE.MOVE_BCK:
                 # MsgMotor -> oMotor
-                self.oMotor = MsgMotor(CommandMotor.MOTOR_BACKWARD)               
+                self.oMotor = MsgMotor(CommandMotor.MOTOR_BACKWARD)
+
+                # Generate oMotor Log
+                sim_time = str(time() - self.system_time)
+                ctrl_run_time = str(time() - self.ctrl_time)
+                    
+                log = sim_time + "," + ctrl_run_time + ",Elevator Ctrl,Motor,S" + str(self.oMotor.contents)
+
+                print(log)               
                 # MsgCar -> oSt
-                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
+                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor - 1, self.destFloor, False)
                 # MoveTo STATE.MOVING
                 self.state = STATE.MOVING
                 pass
@@ -172,6 +214,10 @@ class CarCtrl(ElevatorComponent):
                     self.state = STATE.REACHED
                 pass
             elif self.state == STATE.REACHED:
+                
+                # Null job for motor so it stops and waits in PASSIVE state
+                self.oMotor = None
+
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 # MoveTo STATE.WAIT_TO_OPEN
@@ -194,5 +240,5 @@ if __name__ == '__main__':
     door = None
     motor = None
     car = None
-    ctrl = CarCtrl(door, motor, car)
+    ctrl = CarCtrl(door, motor, car, time())
     ctrl.main()

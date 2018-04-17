@@ -35,6 +35,15 @@ class ElevatorCar(ElevatorComponent):
         while True:
             # Send output
             if(self.oReqMsg):
+
+                # Generate oReq log
+                sim_time = str(time() - self.system_time)
+                oReq_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + oReq_run_time + ",Elevator Btn,Elevator Car,R," + str(self.oReqMsg.contents)
+
+                print(log)
+
                 # Send oReq
                 self.oReq.send(self.oReqMsg)
 
