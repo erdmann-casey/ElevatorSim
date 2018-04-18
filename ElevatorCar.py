@@ -26,7 +26,7 @@ class ElevatorCar(ElevatorComponent):
 
         self.elev_car_time = time()
 
-        pass
+        
 
     def state_processor(self):
         pass
@@ -46,19 +46,54 @@ class ElevatorCar(ElevatorComponent):
 
                 print(log)
 
-                pass
+                
             if(self.oStCarMsg):
+                # Generate oStCarMsg log
+                sim_time = str(time() - self.system_time)
+                oStCar_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + oStCar_run_time + ",Car Ctrl,Elevator Car,R," + str(self.oReqMsg.contents)
+
+                print(log)
                 # Send oStCar
                 self.oStCar.send(self.oStCarMsg)
-                pass
+                # Generate oStCar log
+                sim_time = str(time() - self.system_time)
+                oStCar_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + oStCar_run_time + ",Elevator Car,Elevator Controller,S," + str(self.oReqMsg.contents)
+
+                print(log)
+                
             if(self.oStDoorMsg):
+                # Generate oStDoorMsg log
+                sim_time = str(time() - self.system_time)
+                oStDoor_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + oStDoor_run_time + ",Car Ctrl,Elevator Car,R," + str(self.oStDoorMsg.contents)
+
+                print(log)
                 # Send oStDoor
                 self.oStDoor.send(self.oStDoorMsg)
-                pass
+                # Generate oStDoor log
+                sim_time = str(time() - self.system_time)
+                oStDoor_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + oStDoor_run_time + ",Elevator Car,Door Status Proc,S," + str(self.oStDoorMsg.contents)
+
+                print(log)
+                
             # Get iCmd
             try:
                 job = self.iCmd.recv()
-                self.ctrl.IN = job
+                # Generate oStCarMsg log
+                sim_time = str(time() - self.system_time)
+                iCmd_run_time = str(time() - self.elev_car_time)
+                
+                log = sim_time + "," + iCmd_run_time + ",Elevator Controller,Elevator Car,R," + str(job.contents)
+
+                print(log)
+                self.ctrl.setIN(job)
             except EOFError:
                 pass
 

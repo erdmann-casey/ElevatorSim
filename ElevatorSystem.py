@@ -28,10 +28,10 @@ class ElevatorSystem(object):
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
         self.elevCar = ElevatorCar(None, self.system_time)
-        self.elevCarCtrl = CarCtrl(None, None, None)
-        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
+        self.elevCarCtrl = CarCtrl(None, None, None, self.system_time)
+        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar, self.system_time)
         self.elevCarBtn = CarBtn(self.elevCar, self.system_time)
-        self.elevCarMotor = Motor(self.elevCarCtrl)
+        self.elevCarMotor = Motor(self.elevCarCtrl, self.system_time)
 
         self.elevCar.ctrl = self.elevCarCtrl
         self.elevCarCtrl.car = self.elevCar

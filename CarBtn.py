@@ -17,7 +17,6 @@ class CarBtn(ElevatorComponent):
 
         self.button_time = time()
         
-        pass
 
     def press(self, id):
         # Send Message MsgReq -> OUT
@@ -32,9 +31,6 @@ class CarBtn(ElevatorComponent):
         log = sim_time + "," + btn_run_time + ",Car Btn,Elevator Car,S," + str(self.OUT.contents)
 
         print(log)
-
-
-        pass
     
     def state_processor(self):
         pass
