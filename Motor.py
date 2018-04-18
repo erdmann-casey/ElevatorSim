@@ -35,10 +35,27 @@ class Motor(ElevatorComponent):
                     # Above Met: MoveTo STATE.BUSY
                 if(self.IN.contents['content'] == StatusMotor.MOTOR_MOVING):
                     self.state = STATE.BUSY
+                    # Generate oReq log
+                    sim_time = str(time() - self.system_time)
+                    motor_run_time = str(time() - self.motor_time)
+                    
+                    log = sim_time + "," + motor_run_time + ",Motor,C" + str(self.IN.contents)
+
+                    print(log)
                 pass
             elif self.state == STATE.BUSY:
                 # Send message MsgMotor -> OUT
                 self.OUT = MsgMotor(StatusMotor.MOTOR_MOVING)
+
+                self.ctrl.setiMotor(self.OUT)
+
+                # Generate oReq log
+                sim_time = str(time() - self.system_time)
+                motor_run_time = str(time() - self.motor_time)
+                    
+                log = sim_time + "," + motor_run_time + ",Motor, Elevator Ctrl,S" + str(self.OUT.contents)
+
+                print(log)
                 # MoveTo STATE.PASSIVE
                 self.state = STATE.PASSIVE
                 pass

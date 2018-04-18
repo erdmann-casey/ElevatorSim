@@ -59,6 +59,15 @@ class CarCtrl(ElevatorComponent):
 
         pass
 
+    def setiMotor(self, iMotor):
+        self.iMotor = iMotor
+        sim_time = str(time() - self.system_time)
+        ctrl_run_time = str(time() - self.ctrl_time)
+                    
+        log = sim_time + "," + ctrl_run_time + ",Motor, Elevator Ctrl,R" + str(self.iMotor.contents)
+
+        print(log)
+
     def state_processor(self):
         while True:
 
@@ -144,6 +153,12 @@ class CarCtrl(ElevatorComponent):
             elif self.state == STATE.MOVE_FWD:
                 # MsgMotor -> oMotor
                 self.oMotor = MsgMotor(CommandMotor.MOTOR_FORWARD)
+                sim_time = str(time() - self.system_time)
+                ctrl_run_time = str(time() - self.ctrl_time)
+                    
+                log = sim_time + "," + ctrl_run_time + ",Elevator Ctrl, Motor,S" + str(self.oMotor.contents)
+
+                print(log)
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
                 # MoveTo STATE.MOVING
@@ -151,7 +166,13 @@ class CarCtrl(ElevatorComponent):
                 pass
             elif self.state == STATE.MOVE_BCK:
                 # MsgMotor -> oMotor
-                self.oMotor = MsgMotor(CommandMotor.MOTOR_BACKWARD)               
+                self.oMotor = MsgMotor(CommandMotor.MOTOR_BACKWARD)
+                sim_time = str(time() - self.system_time)
+                ctrl_run_time = str(time() - self.ctrl_time)
+                    
+                log = sim_time + "," + ctrl_run_time + ",Elevator Ctrl, Motor,S" + str(self.oMotor.contents)
+
+                print(log)               
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
                 # MoveTo STATE.MOVING
