@@ -31,7 +31,7 @@ class ElevatorSystem(object):
         self.elevCarCtrl = CarCtrl(None, None, None, self.system_time)
         self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar, self.system_time)
         self.elevCarBtn = CarBtn(self.elevCar, self.system_time)
-        self.elevCarMotor = Motor(self.elevCarCtrl)
+        self.elevCarMotor = Motor(self.elevCarCtrl, self.system_time)
 
         self.elevCar.ctrl = self.elevCarCtrl
         self.elevCarCtrl.car = self.elevCar

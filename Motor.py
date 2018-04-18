@@ -41,7 +41,7 @@ class Motor(ElevatorComponent):
                 sim_time = str(time() - self.system_time)
                 motor_run_time = str(time() - self.motor_time)
                     
-                log = sim_time + "," + motor_run_time + ", Elevator Ctrl,Motor,R" + str(self.IN.contents)
+                log = sim_time + "," + motor_run_time + ",Elevator Ctrl,Motor,R" + str(self.IN.contents)
 
                 print(log)
 
