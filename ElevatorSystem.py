@@ -137,7 +137,7 @@ class ElevatorSystem(object):
         while True:
             if self.elevController.is_alive() and self.doorStatusProc.is_alive() and self.requestProc.is_alive():
                 print("\n-----All Processes Live!-----\n")
-            self.elevCarBtn.press(1)
+
             print(
                 "\n"
                 "1) Start Elevator System\n"
