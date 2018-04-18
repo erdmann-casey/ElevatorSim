@@ -46,7 +46,7 @@ class StatusDoor(Status):
     DOOR_FLOOR_CLOSED = "DoorFloorXCLOSED"
     DOOR_CAR_OPENED = "DoorCarOPENED"
     DOOR_CAR_CLOSED = "DoorCarCLOSED"
-    DOOR_BOTH_OPEN = "DoorCarFloorOPENED"
+    DOOR_BOTH_OPENED = "DoorCarFloorOPENED"
     DOOR_BOTH_CLOSED = "DoorCarFloorCLOSED"
 
 

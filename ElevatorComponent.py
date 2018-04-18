@@ -1,5 +1,4 @@
-from multiprocessing import Process, Pipe
-from CommunicationManager import *
+from multiprocessing import Process
 
 from abc import abstractmethod
 from enum import Enum
@@ -29,6 +28,9 @@ class ElevatorComponent(Process):
             if bSendState is True:
                 self.state_comm.send(self.state)
 
+    def write_log(self, sim_time, real_time, sender, receiver, action, msg_contents):
+        log_str = "{}, {}, {}, {}, {}, {}".format(sim_time, real_time, sender, receiver, action, msg_contents)
+        print(log_str)
 
     @abstractmethod
     def state_processor(self): raise NotImplementedError

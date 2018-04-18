@@ -27,7 +27,7 @@ class ElevatorController(ElevatorComponent):
         self.iReq = None     # Received from Request Processor
         self.iStCar = None   # Received from Elevator Car
         self.iStDoor = None  # Received from Door Status Processor
-        # Messages received
+        # Received Messages
         self.iReq_msg = Msg(None)
         self.iStCar_msg = Msg(None)
         self.iStDoor_msg = Msg(None)
@@ -37,12 +37,11 @@ class ElevatorController(ElevatorComponent):
         self.out = None        # Recipient is Door Status Process
         self.done = None       # Recipient is Request Processor
         # vars
-        # TODO: Set these vars appropriately within state_manager()
-        self.curFloor = None      # int
+        self.curFloor = None      # int TODO: Set within main loop
         self.destFloor = None     # int
         self.isGoUp = None        # boolean
         self.isGoDown = None      # boolean
-        self.isOperating = None   # boolean
+        self.isOperating = None   # boolean TODO: Set within main loop
         self.statusDoor = None    # string
         self.statusCar = None     # string
         self.reset = False        # boolean, otherwise known as "mode" or "reset mode"
@@ -52,6 +51,8 @@ class ElevatorController(ElevatorComponent):
         if self.iReq.poll():
             self.iReq_msg = self.iReq.recv()
             self.destFloor = self.iReq_msg.contents.get("REQ")
+            # TODO: Fill In Proper Times
+            self.write_log(0, 0, "RequestProc", "ElevCtrl", "R", self.iReq_msg.contents)
             return True
         else:
             return False
@@ -60,6 +61,8 @@ class ElevatorController(ElevatorComponent):
         if self.iStCar.poll():
             self.iStCar_msg = self.iStCar.recv()
             self.statusCar = self.iStCar_msg.contents.get("content")
+            # TODO: Fill In Proper Times
+            self.write_log(0, 0, "ElevCar", "ElevCtrl", "R", self.iStCar_msg.contents)
             return True
         else:
             return False
@@ -68,6 +71,8 @@ class ElevatorController(ElevatorComponent):
         if self.iStDoor.poll():
             self.iStDoor_msg = self.iStDoor.recv()
             self.statusDoor = self.iStDoor_msg.contents.get("content")
+            # TODO: Fill In Proper Times
+            self.write_log(0, 0, "DoorStatusProc", "ElevCtrl", "R", self.iStDoor_msg.contents)
             return True
         else:
             return False
@@ -75,26 +80,22 @@ class ElevatorController(ElevatorComponent):
     def send_oCmdCar(self, msg):
         self.oCmdCar.send(msg)
         # TODO: Fill In Proper Times
-        log_str = "{}, {}, ElevatorController, S, {}".format(0, 0, msg.contents)
-        print(log_str)
+        self.write_log(0, 0, "ElevCtrl", "ElevCar", "S", msg.contents)
 
     def send_oCmdFloor(self, msg):
         self.oCmdFloor.send(msg)
         # TODO: Fill In Proper Times
-        log_str = "{}, {}, ElevatorController, S, {}".format(0, 0, msg.contents)
-        print(log_str)
+        self.write_log(0, 0, "ElevCtrl", "FloorX", "S", msg.contents)
 
     def send_out(self, msg):
         self.out.send(msg)
         # TODO: Fill In Proper Times
-        log_str = "{}, {}, ElevatorController, S, {}".format(0, 0, msg.contents)
-        print(log_str)
+        self.write_log(0, 0, "ElevCtrl", "DoorStatusProc", "S", msg.contents)
 
     def send_done(self, msg):
         self.done.send(msg)
         # TODO: Fill In Proper Times
-        log_str = "{}, {}, ElevatorController, S, {}".format(0, 0, msg.contents)
-        print(log_str)
+        self.write_log(0, 0, "ElevCtrl", "RequestProc", "S", msg.contents)
 
     def state_processor(self):
         while True:
@@ -121,10 +122,12 @@ class ElevatorController(ElevatorComponent):
                         self.change_state(STATE.MOVE_DOWN)
 
             if self.state is STATE.MOVE_UP:
+                self.isGoUp = True
                 self.send_oCmdCar(MsgCar(CommandCar.CAR_UP, self.curFloor, self.destFloor, True))
                 self.change_state(STATE.MOVING_UP)
 
             if self.state is STATE.MOVE_DOWN:
+                self.isGoDown = True
                 self.send_oCmdCar(MsgCar(CommandCar.CAR_DOWN, self.curFloor, self.destFloor, True))
                 self.change_state(STATE.MOVING_DOWN)
 
@@ -143,6 +146,7 @@ class ElevatorController(ElevatorComponent):
                         self.change_state(STATE.STOP)
 
             if self.state is STATE.STOP:
+                self.isGoUp, self.isGoDown = False
                 self.send_oCmdCar(MsgCar(CommandCar.CAR_STOP, self.curFloor, self.destFloor, True))
                 self.send_oCmdFloor(MsgDoor(CommandDoor.DOOR_FLOOR_X_OPEN, self.destFloor, True))
                 self.change_state(STATE.WAIT_FOR_CAR_OPEN)
