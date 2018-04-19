@@ -33,7 +33,7 @@ class ElevatorController(ElevatorComponent):
         self.iStDoor_msg = Msg(None)
         # output
         self.oCmdCar = None    # Recipient is Elevator Car
-        self.oCmdFloor = None  # Recipient is Floor(s)
+        self.oCmdFloor = {}  # Recipient is Floor(s)
         self.out = None        # Recipient is Door Status Process
         self.done = None       # Recipient is Request Processor
         # vars
@@ -83,7 +83,7 @@ class ElevatorController(ElevatorComponent):
         self.write_log(0, 0, "ElevCtrl", "ElevCar", "S", msg.contents)
 
     def send_oCmdFloor(self, msg):
-        self.oCmdFloor.send(msg)
+        self.oCmdFloor[msg.contents.get("id")].send(msg)
         # TODO: Fill In Proper Times
         self.write_log(0, 0, "ElevCtrl", "FloorX", "S", msg.contents)
 

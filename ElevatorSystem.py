@@ -38,7 +38,10 @@ class ElevatorSystem(object):
         self.elevCarCtrl.door = self.elevCarDoor
         self.elevCarCtrl.motor = self.elevCarMotor
 
-        self.floors = [Floor(num) for num in range(num_floors)]
+        # self.floors = [Floor(num) for num in range(num_floors)]
+        self.floors = {}
+        for num in range(num_floors):
+            self.floors[num] = Floor(num)
 
         # setup pipes, output->input
         """
@@ -54,7 +57,7 @@ class ElevatorSystem(object):
         self.doorStatusProc.out, self.elevController.iReq = Pipe()
         
         self.elevCar.iCmd, self.elevController.oCmdCar = Pipe()
-        self.elevCar.oReq, self.requestProc.input = Pipe()
+        self.elevCar.oReq, self.requestProc.input[0] = Pipe()  # input[0] reserved for ElevCar, [1] = F1, [2] = F2, etc.
         self.elevCar.oStCar, self.elevController.iStCar = Pipe()
         self.elevCar.oStDoor, self.doorStatusProc.iStCar = Pipe()
 
@@ -63,19 +66,9 @@ class ElevatorSystem(object):
         
         for num in range(num_floors):
             # Floor Pipes...
-            self.floors[num].iCmd, self.elevController.oCmdFloor = Pipe()
-            self.floors[num].oReq, self.requestProc.input = Pipe()
-            self.floors[num].oStatus, self.doorStatusProc.iStFloor = Pipe()
-            """
-            This results in only the last floor to retain functional pipes to the other components
-            Solution? io arrays to match floors? setup single pipe when needed (how will floors send requests)?
-            Pipes are PAIRS of connection objects...
-            
-            Utilizing Sockets, the Server for each component could receive messages from an arbitrary number of
-            senders, just with the need to identify who the sender was to properly process that message. Pipes require
-            a hardline, one-to-one connection. How to solve this problem so that an arbitrary number of floors can all
-            be piped into singleton components?
-            """
+            self.floors.get(num).iCmd, self.elevController.oCmdFloor[num] = Pipe()
+            self.floors.get(num).oReq, self.requestProc.input[num] = Pipe()
+            self.floors.get(num).oStatus, self.doorStatusProc.iStFloor[num] = Pipe()
 
     def start_elevator_system(self):
         #self.elevCar.start()

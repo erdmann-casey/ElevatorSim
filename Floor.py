@@ -1,6 +1,7 @@
 import time
 from ElevatorComponent import ElevatorComponent
 from Messages import MsgFloor, CommandFloor, MsgDoor, CommandDoor, StatusDoor
+from multiprocessing import connection
 
 
 class FloorDoor(ElevatorComponent):
@@ -8,23 +9,23 @@ class FloorDoor(ElevatorComponent):
     processing_time = 1.0  # double
     motion_time = 2.0      # double
 
-    def __init__(self, floor_id, out):
+    def __init__(self, floor_id, oStatus):
         super().__init__()
         # component variables
         self.id = floor_id           # int
         self.job = None              # entity
-        self.oStatus = out
+        self.out = oStatus
         pass
 
     def open_door(self):
         time.sleep(self.processing_time)
         time.sleep(self.motion_time)
-        self.oStatus.send(MsgDoor(StatusDoor().DOOR_FLOOR_OPENED))
+        self.out.send(MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False))
 
     def close_door(self):
         time.sleep(self.processing_time)
         time.sleep(self.motion_time)
-        self.oStatus.send(MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED))
+        self.out.send(MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False))
 
     def state_processor(self):
         while True:
@@ -49,7 +50,7 @@ class Floor(ElevatorComponent):
         self.oReq = None
         self.oStatus = None
         # component vars
-        self.door = FloorDoor(floor_id)
+        self.door = FloorDoor(floor_id, self.oStatus)
         pass
 
     def state_processor(self):

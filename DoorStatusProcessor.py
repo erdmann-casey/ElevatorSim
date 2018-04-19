@@ -16,11 +16,11 @@ class DoorStatusProcessor(ElevatorComponent):
         super().__init__()
         # input
         self.iStCar = None    # Received from Elevator Car
-        self.iStFloor = None  # Received from Floor(s)
+        self.iStFloor = {}  # Received from Floor(s)
         self.input = None     # Received from Elevator Controller
         # msg
         self.iStCar_msg = None
-        self.iStFloor_msg = None
+        self.iStFloor_msg = {}
         self.input_msg = None
         # output
         self.out = None  # Recipient is Elevator Controller
@@ -41,15 +41,29 @@ class DoorStatusProcessor(ElevatorComponent):
         else:
             return False
 
+    def poll_iStFloor(self):
+        for conn in self.iStFloor:
+            index = 1
+            if conn.poll():
+                return True
+            else:
+                index += 1
+                continue
+        return False
+
     def receive_iStFloor(self):
-        if self.iStFloor.poll():
-            self.iStFloor_msg = self.iStFloor.recv()
-            self.doors[self.iStFloor_msg.contents.get("id")] = self.iStFloor_msg.contents.get("content")
-            # TODO: Fill In Proper Times
-            self.write_log(0, 0, "FloorX", "DoorStatusProc", "R", self.iStFloor_msg.contents)
-            return True
-        else:
-            return False
+        for conn in self.iStFloor:
+            index = 1
+            if conn.poll():
+                self.iStFloor_msg[index] = conn.recv()
+                self.doors[self.iStFloor_msg[index].contents.get("id")] = self.iStFloor_msg[index].contents.get("content")
+                # TODO: Fill In Proper Times
+                self.write_log(0, 0, "Floor_" + str(index), "DoorStatusProc", "R", self.iStFloor_msg[index].contents)
+                return True
+            else:
+                index += 1
+                continue
+        return False
 
     def receive_input(self):
         if self.input.poll():
@@ -88,7 +102,7 @@ class DoorStatusProcessor(ElevatorComponent):
                     pass
 
             elif self.state == STATE.DONE:
-                if self.iStFloor.poll() and self.iStCar.poll():
+                if self.poll_iStFloor() and self.iStCar.poll():
                     self.receive_iStCar()
                     self.receive_iStFloor()
                     if self.floorDoorStatus is not None and self.floorDoorStatus is self.carDoorStatus:
