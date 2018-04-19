@@ -32,6 +32,12 @@ class ElevatorComponent(Process):
         log_str = "{}, {}, {}, {}, {}, {}".format(sim_time, real_time, sender, receiver, action, msg_contents)
         print(log_str)
 
+    def get_sim_time(self):
+        return 0
+
+    def get_real_time(self):
+        return 0
+
     @abstractmethod
     def state_processor(self): raise NotImplementedError
 

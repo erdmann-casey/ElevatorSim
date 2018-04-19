@@ -31,6 +31,7 @@ class RequestProcessor(ElevatorComponent):
         self.processing_time = None  # double
         self.state = STATE.PASSIVE   # state is inherited from ElevatorComponent
 
+
     def poll_input(self):
         index = 0
         for conn in self.input:
@@ -49,7 +50,7 @@ class RequestProcessor(ElevatorComponent):
                 self.q.put(self.in_msg[index])
                 self.job = self.in_msg[index]
                 # TODO: Fill In Proper Times
-                self.write_log(0, 0, "[Sender]", "RequestProc", "R", self.in_msg[index].contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(), "[Sender]", "RequestProc", "R", self.in_msg[index].contents)
                 return True
             else:
                 index += 1
@@ -60,7 +61,7 @@ class RequestProcessor(ElevatorComponent):
         if self.next.poll():
             self.next_msg = self.next.recv()
             # TODO: Fill In Proper Times
-            self.write_log(0, 0, "ElevCtrl", "RequestProc", "R", self.next_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "R", self.next_msg.contents)
             return True
         else:
             return False
@@ -68,7 +69,7 @@ class RequestProcessor(ElevatorComponent):
     def send_out(self, msg):
         self.out.send(msg)
         # TODO: Fill In Proper Times
-        self.write_log(0, 0, "RequestProc", "ElevCtrl", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "S", msg.contents)
 
     def state_processor(self):
         while True:

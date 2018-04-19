@@ -36,7 +36,7 @@ class DoorStatusProcessor(ElevatorComponent):
             self.iStCar_msg = self.iStCar.recv()
             self.doors[0] = self.iStCar_msg.contents.get("content")  # Index 0 reserved for Car Door
             # TODO: Fill In Proper Times
-            self.write_log(0, 0, "ElevCar", "DoorStatusProc", "R", self.iStCar_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "DoorStatusProc", "R", self.iStCar_msg.contents)
             return True
         else:
             return False
@@ -58,7 +58,7 @@ class DoorStatusProcessor(ElevatorComponent):
                 self.iStFloor_msg[index] = conn.recv()
                 self.doors[self.iStFloor_msg[index].contents.get("id")] = self.iStFloor_msg[index].contents.get("content")
                 # TODO: Fill In Proper Times
-                self.write_log(0, 0, "Floor_" + str(index), "DoorStatusProc", "R", self.iStFloor_msg[index].contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(index), "DoorStatusProc", "R", self.iStFloor_msg[index].contents)
                 return True
             else:
                 index += 1
@@ -69,7 +69,7 @@ class DoorStatusProcessor(ElevatorComponent):
         if self.input.poll():
             self.input_msg = self.input.recv()
             # TODO: Fill In Proper Times
-            self.write_log(0, 0, "ElevCtrl", "DoorStatusProc", "R", self.input_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "DoorStatusProc", "R", self.input_msg.contents)
             return True
         else:
             return False
@@ -77,7 +77,7 @@ class DoorStatusProcessor(ElevatorComponent):
     def send_out(self, msg):
         self.out.send(msg)
         # TODO: Fill In Proper Times
-        self.write_log(0, 0, "DoorStatusProc", "ElevCtrl", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "DoorStatusProc", "ElevCtrl", "S", msg.contents)
 
     def state_processor(self):
         while True:

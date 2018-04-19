@@ -52,7 +52,7 @@ class ElevatorController(ElevatorComponent):
             self.iReq_msg = self.iReq.recv()
             self.destFloor = self.iReq_msg.contents.get("REQ")
             # TODO: Fill In Proper Times
-            self.write_log(0, 0, "RequestProc", "ElevCtrl", "R", self.iReq_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "R", self.iReq_msg.contents)
             return True
         else:
             return False
@@ -62,7 +62,7 @@ class ElevatorController(ElevatorComponent):
             self.iStCar_msg = self.iStCar.recv()
             self.statusCar = self.iStCar_msg.contents.get("content")
             # TODO: Fill In Proper Times
-            self.write_log(0, 0, "ElevCar", "ElevCtrl", "R", self.iStCar_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "ElevCtrl", "R", self.iStCar_msg.contents)
             return True
         else:
             return False
@@ -72,7 +72,7 @@ class ElevatorController(ElevatorComponent):
             self.iStDoor_msg = self.iStDoor.recv()
             self.statusDoor = self.iStDoor_msg.contents.get("content")
             # TODO: Fill In Proper Times
-            self.write_log(0, 0, "DoorStatusProc", "ElevCtrl", "R", self.iStDoor_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "DoorStatusProc", "ElevCtrl", "R", self.iStDoor_msg.contents)
             return True
         else:
             return False
@@ -80,22 +80,22 @@ class ElevatorController(ElevatorComponent):
     def send_oCmdCar(self, msg):
         self.oCmdCar.send(msg)
         # TODO: Fill In Proper Times
-        self.write_log(0, 0, "ElevCtrl", "ElevCar", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "ElevCar", "S", msg.contents)
 
     def send_oCmdFloor(self, msg):
         self.oCmdFloor[msg.contents.get("id")].send(msg)
         # TODO: Fill In Proper Times
-        self.write_log(0, 0, "ElevCtrl", "FloorX", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "FloorX", "S", msg.contents)
 
     def send_out(self, msg):
         self.out.send(msg)
         # TODO: Fill In Proper Times
-        self.write_log(0, 0, "ElevCtrl", "DoorStatusProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "DoorStatusProc", "S", msg.contents)
 
     def send_done(self, msg):
         self.done.send(msg)
         # TODO: Fill In Proper Times
-        self.write_log(0, 0, "ElevCtrl", "RequestProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "S", msg.contents)
 
     def state_processor(self):
         while True:
@@ -155,7 +155,7 @@ class ElevatorController(ElevatorComponent):
                 if self.iStDoor.poll() and self.iStCar.poll():
                     self.receive_iStDoor()
                     self.receive_iStCar()
-                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_BOTH_OPEN and self.iStCar_msg.contents.get("content") is StatusCar.CAR_OPENING:
+                    if self.iStDoor_msg.contents.get("content") is StatusDoor.DOOR_BOTH_OPENED and self.iStCar_msg.contents.get("content") is StatusCar.CAR_OPENING:
                         self.change_state(STATE.WAIT_FOR_CAR_CLOSE)
 
             if self.state is STATE.WAIT_FOR_CAR_CLOSE:
