@@ -10,14 +10,12 @@ from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
 from DoorStatusProcessor import DoorStatusProcessor
 from Floor import Floor
-from time import time
 
 class ElevatorSystem(object):
 
     def __init__(self, num_floors):
         super(ElevatorSystem, self).__init__()
 
-        self.system_time = time()
 
         # initialize components
         self.elevController = ElevatorController()
@@ -25,11 +23,11 @@ class ElevatorSystem(object):
         self.doorStatusProc = DoorStatusProcessor()
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
-        self.elevCar = ElevatorCar(None, self.system_time)
-        self.elevCarCtrl = CarCtrl(None, None, None, self.system_time)
-        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar, self.system_time)
-        self.elevCarBtn = CarBtn(self.elevCar, self.system_time)
-        self.elevCarMotor = Motor(self.elevCarCtrl, self.system_time)
+        self.elevCar = ElevatorCar(None)
+        self.elevCarCtrl = CarCtrl(None, None, None)
+        self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
+        self.elevCarBtn = CarBtn(self.elevCar)
+        self.elevCarMotor = Motor(self.elevCarCtrl)
 
         self.elevCar.ctrl = self.elevCarCtrl
         self.elevCarCtrl.car = self.elevCar
@@ -111,9 +109,15 @@ class ElevatorSystem(object):
         print("Current States:")
         # print Elevator Car States
         print("Elevator Controller: {}".format(self.elevController.state))
-        # print("Request Processor: {}".format(self.rp_pipe.recv()))
         print("Request Processor: {}".format(self.requestProc.state))
         print("Door Status Processor: {}".format(self.doorStatusProc.state))
+        print("Elevator Car: {}".format(self.elevCar.state))
+        print("Car Controller: {}".format(self.elevCarCtrl.state))
+        print("Motor: {}".format(self.elevCarMotor.state))
+        print("Car Door: {}".format(self.elevCarDoor.state))
+        print("Car Button: {}".format(self.elevCarBtn.state))
+
+
 
     def elevator_menu(self):
         while True:
@@ -128,7 +132,7 @@ class ElevatorSystem(object):
             else:
                 floor_no = int(user_input)
                 if 0 < floor_no <= len(self.floors):
-                    # TODO: ElevCar.PressButton(floor_no)
+                    self.elevCarBtn.press(floor_no)
                     print("Queueing Floor {} For Next Stop".format(floor_no))
                     break
                 else:
