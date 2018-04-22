@@ -1,5 +1,4 @@
 from multiprocessing import Queue
-
 from ElevatorComponent import ElevatorComponent
 from Messages import *
 
@@ -18,7 +17,12 @@ class RequestProcessor(ElevatorComponent):
     def __init__(self):
         super().__init__()
         # input
-        self.input = dict()  # Key 0 is Elevator Car, Key 1 is Floor 1, Key 2 is Floor 2, etc.
+        self.input_car = None  # Key 0 is Elevator Car, Key 1 is Floor 1, Key 2 is Floor 2, etc.
+        self.input_floor1 = None
+        self.input_floor2 = None
+        self.input_floor3 = None
+        self.input_floor4 = None
+        self.input_floor5 = None
         self.next = None
         # Received Messages
         self.in_msg = {}  # Key 0 is MsgReq from ElevCar, Key 1 is from Floor 1, Key 2 Floor 2, etc.
@@ -28,39 +32,59 @@ class RequestProcessor(ElevatorComponent):
         # component vars
         self.q = Queue()             # Queue<entity>
         self.job = None              # entity
-        self.processing_time = None  # double
+        self.processing_time = 2.00  # double, set here arbitrarily
         self.state = STATE.PASSIVE   # state is inherited from ElevatorComponent
 
+    def poll_input(self, id):
+        if id is 0:
+            return self.input_car.poll()
+        if id is 1:
+            return self.input_floor1.poll()
+        if id is 2:
+            return self.input_floor2.poll()
+        if id is 3:
+            return self.input_floor3.poll()
+        if id is 4:
+            return self.input_floor4.poll()
+        if id is 5:
+            return self.input_floor5.poll()
 
-    def poll_input(self):
-        index = 0
-        for conn in self.input:
-            if conn.poll():
-                return True
-            else:
-                index += 1
-                continue
-        return False
+    def receive_input(self, id):
+        if id is 0:
+            self.in_msg[id] = self.input_car.recv()
+            self.q.put(self.in_msg[id])
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "RequestProc", "R", self.in_msg[id].contents)
+        if id is 1:
+            self.in_msg[id] = self.input_floor1.recv()
+            self.q.put(self.in_msg[id])
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "RequestProc", "R", self.in_msg[id].contents)
+        if id is 2:
+            self.in_msg[id] = self.input_floor2.recv()
+            self.q.put(self.in_msg[id])
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "RequestProc", "R", self.in_msg[id].contents)
+        if id is 3:
+            self.in_msg[id] = self.input_floor3.recv()
+            self.q.put(self.in_msg[id])
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "RequestProc", "R", self.in_msg[id].contents)
+        if id is 4:
+            self.in_msg[id] = self.input_floor4.recv()
+            self.q.put(self.in_msg[id])
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "RequestProc", "R", self.in_msg[id].contents)
+        if id is 5:
+            self.in_msg[id] = self.input_floor5.recv()
+            self.q.put(self.in_msg[id])
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "RequestProc", "R", self.in_msg[id].contents)
 
-    def receive_input(self):
-        index = 0
-        for conn in self.input:
-            if conn.poll():
-                self.in_msg[index] = conn.recv()  # msg is a Floor Request
-                self.q.put(self.in_msg[index])
-                self.job = self.in_msg[index]
-                # TODO: Fill In Proper Times
-                self.write_log(self.get_sim_time(), self.get_real_time(), "[Sender]", "RequestProc", "R", self.in_msg[index].contents)
-                return True
+    def receive_input_all(self):
+        for num in range(5):
+            if self.poll_input(num):
+                self.receive_input(num)
             else:
-                index += 1
                 continue
-        return False
 
     def receive_next(self):
         if self.next.poll():
             self.next_msg = self.next.recv()
-            # TODO: Fill In Proper Times
             self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "R", self.next_msg.contents)
             return True
         else:
@@ -68,20 +92,20 @@ class RequestProcessor(ElevatorComponent):
 
     def send_out(self, msg):
         self.out.send(msg)
-        # TODO: Fill In Proper Times
         self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "S", msg.contents)
 
     def state_processor(self):
         while True:
             if self.state is STATE.PASSIVE:
-                if self.poll_input():
-                    self.receive_input()
+                self.receive_input_all()
 
-                if self.q.empty() and self.job is None:
+                if self.q.empty():
                     self.change_state(STATE.PASSIVE)
+                    continue
 
-                elif not self.q.empty() and self.job is not None:
+                elif not self.q.empty():
                     self.change_state(STATE.SEND_JOB)
+                    continue
 
             elif self.state is STATE.SEND_JOB:
                 if not self.q.empty():
@@ -89,25 +113,20 @@ class RequestProcessor(ElevatorComponent):
                     self.send_out(self.job)
                     self.job = None
                     self.change_state(STATE.BUSY)
+                    continue
 
             elif self.state is STATE.BUSY:
-                # TODO: Fix this code block
-                # BUSY -> SENDJOB transition will loop endlessly
-                if self.poll_input():
-                    self.receive_input()
-                    if self.job is not None and not self.q.empty() and self.next_msg.contents.get("ELEV") is True:
-                        self.change_state(STATE.SEND_JOB)
+                self.receive_input_all()
 
-                if self.next.poll():
+                if self.q.empty():
+                    self.change_state(STATE.BUSY)
+                    continue
+
+                elif self.next.poll():
                     self.receive_next()
-                    if self.next_msg.contents.get("ELEV") is False or self.q.empty():
-                        self.change_state(STATE.BUSY)
-
-                    elif self.next_msg.contents.get("ELEV") is True and not self.q.empty():
+                    if self.next_msg.contents.get("ELEV") is True:
                         self.change_state(STATE.SEND_JOB)
-
-                    elif self.next_msg.contents.get("ELEV") is not None and not self.q.empty():
-                        self.change_state(STATE.SEND_JOB)
+                        continue
 
     def main(self):
         self.state_processor()

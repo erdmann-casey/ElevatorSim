@@ -1,7 +1,7 @@
 from multiprocessing import Process
-
 from abc import abstractmethod
 from enum import Enum
+from time import time
 
 
 class STATE(Enum):
@@ -14,6 +14,7 @@ class ElevatorComponent(Process):
         super().__init__()
         self.state = STATE.NONE
         self.state_comm = None
+        self.start_time = time()
         pass
 
     def run(self):
@@ -33,18 +34,13 @@ class ElevatorComponent(Process):
         print(log_str)
 
     def get_sim_time(self):
-        return 0
+        return time() - self.start_time
 
     def get_real_time(self):
-        return 0
+        return time()
 
     @abstractmethod
     def state_processor(self): raise NotImplementedError
 
     @abstractmethod
     def main(self): raise NotImplementedError
-
-    """
-    Need Abstract Methods used for Logging
-    """
-

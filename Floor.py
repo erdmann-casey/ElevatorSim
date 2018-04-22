@@ -1,40 +1,73 @@
 import time
 from ElevatorComponent import ElevatorComponent
 from Messages import MsgFloor, CommandFloor, MsgDoor, CommandDoor, StatusDoor
-from multiprocessing import connection
+from enum import Enum
+
+
+class STATE(Enum):
+    """
+    States used exclusively by Floor
+    """
+    OPENED = "opened"
+    CLOSED = "closed"
 
 
 class FloorDoor(ElevatorComponent):
 
-    processing_time = 1.0  # double
-    motion_time = 2.0      # double
+    processing_time = 1.0  # double, set arbitrarily
+    motion_time = 2.0      # double, set arbitrarily
 
-    def __init__(self, floor_id, oStatus):
+    def __init__(self, floor_id, iCmd, oStatus):
         super().__init__()
         # component variables
         self.id = floor_id           # int
         self.job = None              # entity
+        self.input = iCmd
         self.out = oStatus
-        pass
+        self.state = STATE.CLOSED
 
     def open_door(self):
         time.sleep(self.processing_time)
         time.sleep(self.motion_time)
-        self.out.send(MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False))
+        self.state = STATE.OPENED
+        msg = MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
+        self.out.send(msg)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
 
     def close_door(self):
         time.sleep(self.processing_time)
         time.sleep(self.motion_time)
-        self.out.send(MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False))
+        self.state = STATE.CLOSED
+        msg = MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
+        self.out.send(msg)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
+
+    def receive_in(self):
+        if self.input.poll():
+            msg = self.input.recv()
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_" + str(self.id), "R", msg.contents)
+            self.job = msg.contents.get("content")
 
     def state_processor(self):
         while True:
+            self.receive_in()
+
             if self.job is None:
-                pass
+                continue
+
             elif self.job is CommandDoor.DOOR_FLOOR_X_OPEN:
-                self.open_door()
+                self.job = None
+                if self.state is STATE.OPENED:
+                    continue
+                else:
+                    self.open_door()
+
             elif self.job is CommandDoor.DOOR_FLOOR_X_CLOSE:
-                self.close_door()
+                self.job = None
+                if self.state is STATE.CLOSED:
+                    continue
+                else:
+                    self.close_door()
 
     def main(self):
         self.state_processor()
@@ -42,26 +75,21 @@ class FloorDoor(ElevatorComponent):
 
 class Floor(ElevatorComponent):
 
-    def __init__(self, floor_id):
+    def __init__(self, floor_id, in_cmd, out_req, out_status):
         super().__init__()
         # input
-        self.iCmd = None
-        # outputS
-        self.oReq = None
-        self.oStatus = None
+        self.iCmd = in_cmd
+        # outputs
+        self.oReq = out_req
+        self.oStatus = out_status
+        # msg
+        self.iCmd_msg = None
         # component vars
-        self.door = FloorDoor(floor_id, self.oStatus)
-        pass
+        self.door = FloorDoor(floor_id, self.iCmd, self.oStatus)
 
     def state_processor(self):
         while True:
-            try:
-                job = self.iCmd.recv()
-                self.door.job = job
-            except EOFError:
-                # Pipe Connection Terminated, TODO: Fix this
-                pass
-        pass
+            continue
 
     def main(self):
         self.state_processor()
@@ -69,6 +97,7 @@ class Floor(ElevatorComponent):
     def send_request(self):
         msg = MsgFloor(CommandFloor.FLOOR_REQ, self.door.id)
         self.oReq.send(msg)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.door.id), "RequestProc", "S", msg.contents)
 
 
 if __name__ == '__main__':
