@@ -160,8 +160,6 @@ class ElevatorSystem(object):
     def check_all_processes_live(self):
         if not self.elevCar.is_alive():
             print("ElevCar Process Not Running!!")
-        if not self.elevCarBtn.is_alive():
-            print("ElevCarBtn Process Not Running!!")
         if not self.elevCarCtrl.is_alive():
             print("ElevCarCtrl Process Not Running!!")
         if not self.elevCarDoor.is_alive():
@@ -219,11 +217,7 @@ class ElevatorSystem(object):
         if self.elevCar.is_alive():
             self.elevCar.terminate()
             self.elevCar.join()
-
-        if self.elevCarBtn.is_alive():
-            self.elevCarBtn.terminate()
-            self.elevCarBtn.join()
-
+            
         if self.elevCarCtrl.is_alive():
             self.elevCarCtrl.terminate()
             self.elevCarCtrl.join()
