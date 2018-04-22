@@ -30,8 +30,10 @@ class ElevatorComponent(Process):
                 self.state_comm.send(self.state)
 
     def write_log(self, sim_time, real_time, sender, receiver, action, msg_contents):
-        log_str = "{}, {}, {}, {}, {}, {}".format(sim_time, real_time, sender, receiver, action, msg_contents)
-        print(log_str)
+        log_str = "{}, {}, {}, {}, {}, {}\n".format(sim_time, real_time, sender, receiver, action, msg_contents)
+        file = open("logs.txt", "a+")
+        file.write(log_str)
+        file.close()
 
     def get_sim_time(self):
         return time() - self.start_time
