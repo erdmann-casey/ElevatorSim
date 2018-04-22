@@ -1,10 +1,10 @@
 from ElevatorComponent import ElevatorComponent
 from Messages import *
-from time import time
+
 
 class ElevatorCar(ElevatorComponent):
 
-    def __init__(self, CarCtrl, system_time):
+    def __init__(self, CarCtrl):
         super().__init__()
         # input
         self.iCmd = None    # Received from Elevator Controller
@@ -22,10 +22,6 @@ class ElevatorCar(ElevatorComponent):
         # Coupled Input/Output: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
         self.ctrl = CarCtrl
 
-        self.system_time = system_time
-
-        self.elev_car_time = time()
-
         
 
     def state_processor(self):
@@ -39,60 +35,34 @@ class ElevatorCar(ElevatorComponent):
                 self.oReq.send(self.oReqMsg)
 
                 # Generate oReq log
-                sim_time = str(time() - self.system_time)
-                oReq_run_time = str(time() - self.elev_car_time)
-                
-                log = sim_time + "," + oReq_run_time + ",Elevator Car,Request Proc,S," + str(self.oReqMsg.contents)
-
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Request Proc","S", self.oReqMsg.contents)
 
                 
             if(self.oStCarMsg):
                 # Generate oStCarMsg log
-                sim_time = str(time() - self.system_time)
-                oStCar_run_time = str(time() - self.elev_car_time)
-                
-                log = sim_time + "," + oStCar_run_time + ",Car Ctrl,Elevator Car,R," + str(self.oReqMsg.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStCarMsg.contents)
 
-                print(log)
                 # Send oStCar
                 self.oStCar.send(self.oStCarMsg)
                 # Generate oStCar log
-                sim_time = str(time() - self.system_time)
-                oStCar_run_time = str(time() - self.elev_car_time)
-                
-                log = sim_time + "," + oStCar_run_time + ",Elevator Car,Elevator Controller,S," + str(self.oReqMsg.contents)
-
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Elevator Ctrl","S", self.oStCarMsg.contents)
                 
             if(self.oStDoorMsg):
                 # Generate oStDoorMsg log
-                sim_time = str(time() - self.system_time)
-                oStDoor_run_time = str(time() - self.elev_car_time)
-                
-                log = sim_time + "," + oStDoor_run_time + ",Car Ctrl,Elevator Car,R," + str(self.oStDoorMsg.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStDoorMsg.contents)
 
-                print(log)
                 # Send oStDoor
                 self.oStDoor.send(self.oStDoorMsg)
-                # Generate oStDoor log
-                sim_time = str(time() - self.system_time)
-                oStDoor_run_time = str(time() - self.elev_car_time)
-                
-                log = sim_time + "," + oStDoor_run_time + ",Elevator Car,Door Status Proc,S," + str(self.oStDoorMsg.contents)
 
-                print(log)
-                
+                # Generate oStDoor log
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Door Status Proc","S", self.oStDoorMsg.contents)
+               
             # Get iCmd
             try:
                 job = self.iCmd.recv()
                 # Generate oStCarMsg log
-                sim_time = str(time() - self.system_time)
-                iCmd_run_time = str(time() - self.elev_car_time)
-                
-                log = sim_time + "," + iCmd_run_time + ",Elevator Controller,Elevator Car,R," + str(job.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Elevator Car","R", job.contents)
 
-                print(log)
                 self.ctrl.setIN(job)
             except EOFError:
                 pass
@@ -101,5 +71,5 @@ class ElevatorCar(ElevatorComponent):
 
 if __name__ == '__main__':
     ctrl = None
-    car = ElevatorCar(ctrl, time())
+    car = ElevatorCar(ctrl)
     car.main()

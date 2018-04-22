@@ -1,6 +1,5 @@
 from ElevatorComponent import ElevatorComponent
 from Messages import *
-from time import time
 
 class STATE(Enum):
     """
@@ -26,7 +25,7 @@ class STATE(Enum):
 
 class CarCtrl(ElevatorComponent):
     
-    def __init__(self, CarDoor, Motor, ElevatorCar, system_time):
+    def __init__(self, CarDoor, Motor, ElevatorCar):
         super().__init__()
         # input
         self.iDoor = None    # Received from Car Door
@@ -56,43 +55,26 @@ class CarCtrl(ElevatorComponent):
 
         self.motorStatus = StatusMotor.MOTOR_REACHED
 
-        self.system_time = system_time
-
-        self.ctrl_time = time()
-
         
 
     def setiMotor(self, iMotor):
         self.iMotor = iMotor
-        sim_time = str(time() - self.system_time)
-        ctrl_run_time = str(time() - self.ctrl_time)
-                    
-        log = sim_time + "," + ctrl_run_time + ",Motor, Car Ctrl,R" + str(self.iMotor.contents)
-
-        print(log)
+        
+        # Generate iMotor Log 
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","Car Ctrl","R", self.iMotor.contents)
 
     
     def setiDoor(self, iDoor): 
         self.iDoor = iDoor 
  
         # Generate iDoor Log 
-        sim_time = str(time() - self.system_time) 
-        ctrl_run_time = str(time() - self.ctrl_time) 
-                     
-        log = sim_time + "," + ctrl_run_time + ",Car Door, Car Ctrl,R" + str(self.iDoor.contents) 
- 
-        print(log)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Car Ctrl","R", self.iDoor.contents)
 
     def setIN(self, IN):
         self.IN = IN 
 
         # Generate IN Log 
-        sim_time = str(time() - self.system_time) 
-        in_run_time = str(time() - self.ctrl_time) 
-                     
-        log = sim_time + "," + in_run_time + ",Elevator Ctrl, Car Ctrl,R" + str(self.IN.contents) 
- 
-        print(log)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Car Ctrl","R", self.IN.contents)
 
     def state_processor(self):
         while True:
@@ -111,16 +93,18 @@ class CarCtrl(ElevatorComponent):
             if self.state == STATE.IDLE:
                 # in ? msgDoor && cmdDoor == OPEN 
                     # Above Met: MoveTo STATE.OPENING_DOOR
-                if(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
-                    self.state = STATE.OPENING_DOOR
-                
-                # in ? en && cmdCar == MOVE
-                    # Above Met: MoveTo STATE.PREP_TO_CLOSE
-                elif(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
-                    self.state = STATE.PREP_TO_CLOSE
 
-                # Elevator Car is idle, set operating to False
-                self.operating = False
+                if(self.IN):
+                    if(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+                        self.state = STATE.OPENING_DOOR
+                    
+                    # in ? en && cmdCar == MOVE
+                        # Above Met: MoveTo STATE.PREP_TO_CLOSE
+                    elif(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
+                        self.state = STATE.PREP_TO_CLOSE
+
+                    # Elevator Car is idle, set operating to False
+                    self.operating = False
 
                 
             
@@ -129,32 +113,18 @@ class CarCtrl(ElevatorComponent):
                 self.oDoor = MsgDoor(StatusDoor.DOOR_CAR_OPENED, self.curFloor, False)
                 self.car.oStDoorMsg = self.oDoor
                 # Generate Opening Status Log 
-                sim_time = str(time() - self.system_time) 
-                opening_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + opening_run_time + ",Car Ctrl,C" + str(self.oDoor.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
 
                 # Generate oDoor Log 
-                sim_time = str(time() - self.system_time) 
-                opening_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + opening_run_time + ",Car Ctrl,Car Door,S" + str(self.oDoor.contents) 
-        
-                print(log)
-
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
 
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_OPENING, self.curFloor, self.destFloor, False)
                 self.car.oStCarMsg = self.oSt
+
                 # Generate oSt Log 
-                sim_time = str(time() - self.system_time) 
-                opening_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + opening_run_time + ",Car Ctrl,Elevator Car,S" + str(self.oSt.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+
                 # MoveTo STATE.CONFIRM_OPEN
                 self.state = STATE.CONFIRM_OPEN
                 # Elevator Car is no longer in IDLE, set operating to True
@@ -163,27 +133,18 @@ class CarCtrl(ElevatorComponent):
             elif self.state == STATE.CONFIRM_OPEN:
                 # iDoor ? msg && statusDoor == OPENED
                     # Above Met: MoveTo STATE.CLOSING
-                if(self.iDoor.contents['content'] == StatusDoor.DOOR_CAR_OPENED):
-                    self.state = STATE.CLOSING
-                
-                # Generate Opened Status Log 
-                sim_time = str(time() - self.system_time) 
-                opened_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + opened_run_time + ",Car Ctrl,C" + str(self.iDoor.contents) 
-        
-                print(log)
+                if(self.iDoor):
+                    if(self.iDoor.contents['content'] == StatusDoor.DOOR_CAR_OPENED):
+                        self.state = STATE.CLOSING
+                    
+                    # Generate Opened Status Log 
+                    self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.iDoor.contents)
 
             elif self.state == STATE.CLOSING:
                 # MoveTo STATE.PREP_TO_CLOSE
                 
                 # Generate Closing Status Log 
-                sim_time = str(time() - self.system_time) 
-                closing_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + closing_run_time + ",Car Ctrl,C" + str(STATE.CLOSING) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", STATE.CLOSING)
 
                 self.state == STATE.PREP_TO_CLOSE
 
@@ -192,32 +153,17 @@ class CarCtrl(ElevatorComponent):
                 self.oDoor = MsgDoor(StatusDoor.DOOR_CAR_CLOSED, self.curFloor, False)
                 self.car.oStDoorMsg = self.oDoor
                 # Generate Closing Status Log 
-                sim_time = str(time() - self.system_time) 
-                prep_closing_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + prep_closing_run_time + ",Car Ctrl,C" + str(self.oDoor.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
 
                 # Generate oDoor Status Log 
-                sim_time = str(time() - self.system_time) 
-                prep_closing_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + prep_closing_run_time + ",Car Ctrl,Car Door,S" + str(self.oDoor.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
 
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 self.car.oStCarMsg = self.oSt
                 
                 # Generate oSt Log 
-                sim_time = str(time() - self.system_time) 
-                prep_closing_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + prep_closing_run_time + ",Car Ctrl,Elevator Car,S" + str(self.oSt.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
 
                 # MoveTo STATE.CONFIRM_CLOSE
                 self.state = STATE.CONFIRM_CLOSE
@@ -227,119 +173,101 @@ class CarCtrl(ElevatorComponent):
             elif self.state == STATE.CONFIRM_CLOSE:
                 # iDoor ? msg && statusDoor == CLOSE && inProcess
                     # Above Met: MoveTo STATE.PREP_TO_MOVE
-                if(self.iDoor.contents['content'] == StatusDoor.DOOR_CAR_CLOSED):
-                    self.state = STATE.PREP_TO_MOVE
-                
-                # Generate Closing Status Log 
-                sim_time = str(time() - self.system_time) 
-                closed_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + closed_run_time + ",Car Ctrl,C" + str(self.iDoor.contents) 
-        
-                print(log)
+                if(self.iDoor):
+                    if(self.iDoor.contents['content'] == StatusDoor.DOOR_CAR_CLOSED):
+                        self.state = STATE.PREP_TO_MOVE
+                    
+                    # Generate Closing Status Log 
+                    self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.iDoor.contents)
 
-                pass
+                
             elif self.state == STATE.PREP_TO_MOVE:
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_READY_TO_MOVE, self.curFloor, self.destFloor, False)
                 self.car.oStCarMsg = self.oSt
                 # Generate oSt Log 
-                sim_time = str(time() - self.system_time) 
-                prep_move_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + prep_move_run_time + ",Car Ctrl,Elevator Car,S" + str(self.oSt.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+
                  # MoveTo STATE.WAIT_TO_MOVE
                 self.state = STATE.WAIT_TO_MOVE
                 
             elif self.state == STATE.WAIT_TO_MOVE:
                 # in ? msg && cmdCar == Up
                     # Above Met: MoveTo STATE.MOVE_FWD
-                if(self.IN.contents['content'] == CommandCar.CAR_UP):
-                    self.state = STATE.MOVE_FWD
-                # in ? msg && cmdCar == Down
-                    # Above Met: MoveTo STATE.MOVE_BCK
-                elif(self.IN.contents['content'] == CommandCar.CAR_DOWN):
-                    self.state = STATE.MOVE_BCK               
+                if(self.IN):
+                    if(self.IN.contents['content'] == CommandCar.CAR_UP):
+                        self.state = STATE.MOVE_FWD
+                    # in ? msg && cmdCar == Down
+                        # Above Met: MoveTo STATE.MOVE_BCK
+                    elif(self.IN.contents['content'] == CommandCar.CAR_DOWN):
+                        self.state = STATE.MOVE_BCK               
                 
             elif self.state == STATE.MOVE_FWD:
                 # MsgMotor -> oMotor
                 self.oMotor = MsgMotor(CommandMotor.MOTOR_FORWARD)
-                sim_time = str(time() - self.system_time)
-                ctrl_run_time = str(time() - self.ctrl_time)
-                    
-                log = sim_time + "," + ctrl_run_time + ",Elevator Ctrl, Motor,S" + str(self.oMotor.contents)
 
-                print(log)
+                # Generate oMotor Log
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", self.oMotor.contents)
+
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor + 1, self.destFloor, False)
                 self.car.oStCarMsg = self.oSt
                 # Generate oSt Log 
-                sim_time = str(time() - self.system_time) 
-                move_fwd_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + move_fwd_run_time + ",Car Ctrl,Elevator Car,S" + str(self.oSt.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+               
                 # MoveTo STATE.MOVING
                 self.state = STATE.MOVING
                 
             elif self.state == STATE.MOVE_BCK:
                 # MsgMotor -> oMotor
                 self.oMotor = MsgMotor(CommandMotor.MOTOR_BACKWARD)
-                sim_time = str(time() - self.system_time)
-                ctrl_run_time = str(time() - self.ctrl_time)
-                    
-                log = sim_time + "," + ctrl_run_time + ",Elevator Ctrl, Motor,S" + str(self.oMotor.contents)
-
-                print(log)               
+                
+                # Generate oMotor Log    
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", self.oMotor.contents)
+         
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor - 1, self.destFloor, False)
                 self.car.oStCarMsg = self.oSt
+
                 # Generate oSt Log 
-                sim_time = str(time() - self.system_time) 
-                move_bck_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + move_bck_run_time + ",Car Ctrl,Elevator Car,S" + str(self.oSt.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+
                 # MoveTo STATE.MOVING
                 self.state = STATE.MOVING
                 
             elif self.state == STATE.MOVING:
                 # in ? MsgCar && cmdCar == DOWN && statusDoor == CLOSED && operating == true && motor_running == false
                     # Above Met: MoveTo STATE.WAIT_TO_MOVE
-                if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
-                    self.state = STATE.WAIT_TO_MOVE
-                # in ? MsgCar && cmdCar == UP && statusDoor == CLOSED && operating == true && motor_running == false
-                    # Above Met: MoveTo STATE.WAIT_TO_MOVE
-                elif(self.IN.contents['content'] == CommandCar.CAR_UP and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
-                    self.state = STATE.WAIT_TO_MOVE
-                # iMotor ? MsgMotor pos==dest
-                    # Above Met: MoveTo STATE.REACHED
-                elif(self.iMotor and self.curFloor == self.destFloor):
-                    self.state = STATE.REACHED
-                
+
+                if(self.IN):
+                    if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
+                        self.state = STATE.WAIT_TO_MOVE
+                    # in ? MsgCar && cmdCar == UP && statusDoor == CLOSED && operating == true && motor_running == false
+                        # Above Met: MoveTo STATE.WAIT_TO_MOVE
+                    elif(self.IN.contents['content'] == CommandCar.CAR_UP and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
+                        self.state = STATE.WAIT_TO_MOVE
+                    # iMotor ? MsgMotor pos==dest
+                        # Above Met: MoveTo STATE.REACHED
+                    elif(self.iMotor and self.curFloor == self.destFloor):
+                        self.state = STATE.REACHED
+                    
             elif self.state == STATE.REACHED:
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 self.car.oStCarMsg = self.oSt
+
                 # Generate oSt Log 
-                sim_time = str(time() - self.system_time) 
-                reached_run_time = str(time() - self.ctrl_time) 
-                            
-                log = sim_time + "," + reached_run_time + ",Car Ctrl,Elevator Car,S" + str(self.oSt.contents) 
-        
-                print(log)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+
                 # MoveTo STATE.WAIT_TO_OPEN
                 self.state = STATE.WAIT_TO_OPEN
                 
             elif self.state == STATE.WAIT_TO_OPEN:
                 # in ? msg && cmdDoor == OPEN
                     # Above Met: MoveTo STATE.OPENING_DOOR
-                if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
-                    self.state = STATE.OPENING_DOOR
+                if(self.IN):
+                    if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+                        self.state = STATE.OPENING_DOOR
                 
 
         
@@ -352,5 +280,5 @@ if __name__ == '__main__':
     door = None
     motor = None
     car = None
-    ctrl = CarCtrl(door, motor, car, time())
+    ctrl = CarCtrl(door, motor, car)
     ctrl.main()
