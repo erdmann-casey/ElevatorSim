@@ -23,6 +23,21 @@ class ElevatorCar(ElevatorComponent):
         self.ctrl = CarCtrl
 
         
+    def setoReqMsg(self, msg):
+        self.oReqMsg = msg
+        # Generate oReqMsg log
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Button","Elevator Car","R", self.oReqMsg.contents)
+
+    def setoStCarMsg(self, msg):
+        self.oStCarMsg = msg
+        # Generate oStCarMsg log
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStCarMsg.contents)
+
+    def setoStDoorMsg(self, msg):
+        self.oStDoorMsg = msg
+        # Generate oStDoorMsg log
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStDoorMsg.contents)
+
 
     def state_processor(self):
         pass
@@ -39,18 +54,12 @@ class ElevatorCar(ElevatorComponent):
 
                 
             if(self.oStCarMsg):
-                # Generate oStCarMsg log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStCarMsg.contents)
-
                 # Send oStCar
                 self.oStCar.send(self.oStCarMsg)
                 # Generate oStCar log
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Elevator Ctrl","S", self.oStCarMsg.contents)
                 
             if(self.oStDoorMsg):
-                # Generate oStDoorMsg log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStDoorMsg.contents)
-
                 # Send oStDoor
                 self.oStDoor.send(self.oStDoorMsg)
 

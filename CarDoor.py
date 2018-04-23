@@ -66,7 +66,6 @@ class CarDoor(ElevatorComponent):
             elif self.state == STATE.OPENING:
                 # Send message MsgDoor -> OUT
                 self.OUT = MsgDoor(StatusDoor.DOOR_CAR_OPENED, 100, False)
-                self.ctrl.setiDoor(self.OUT)
 
                 # MoveTo STATE.OPENED
                 self.state = STATE.OPENED
@@ -76,6 +75,10 @@ class CarDoor(ElevatorComponent):
                 
                 # Generate OUT Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Car Ctrl","S",self.OUT.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Elevator Car","S",self.OUT.contents)
+                
+                self.ctrl.setiDoor(self.OUT)
+                self.car.setoStDoorMsg(self.OUT)
 
                 sleep(self.processing_time)
                 sleep(self.motion_time)
@@ -89,7 +92,10 @@ class CarDoor(ElevatorComponent):
 
                 # Generate OUT Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Car Ctrl","S",self.OUT.contents)
-                
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Elevator Car","S",self.OUT.contents)
+
+                self.ctrl.setiDoor(self.OUT)
+                self.car.setoStDoorMsg(self.OUT)
 
     def main(self):
         self.state_processor()

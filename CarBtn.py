@@ -17,12 +17,11 @@ class CarBtn(ElevatorComponent):
     def press(self, id):
         # Send Message MsgReq -> OUT
         self.OUT = MsgReq(id)
-    
-        self.car.oReqMsg = self.OUT
 
         # Generate button pressed log
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Btn","Elevator Car","S",self.OUT.contents)
-    
+        
+        self.car.setoReqMsg(self.OUT)
     def state_processor(self):
         pass
         
