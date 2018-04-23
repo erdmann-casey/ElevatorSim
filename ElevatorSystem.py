@@ -244,6 +244,8 @@ class ElevatorSystem(object):
 
         for floor_no in self.floors:
             if self.floors.get(floor_no).is_alive():
+                self.floors.get(floor_no).door.terminate()
+                self.floors.get(floor_no).door.join()
                 self.floors.get(floor_no).terminate()
                 self.floors.get(floor_no).join()
 
