@@ -22,6 +22,7 @@ class CarBtn(ElevatorComponent):
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Btn","Elevator Car","S",self.OUT.contents)
         
         self.car.setoReqMsg(self.OUT)
+        
     def state_processor(self):
         pass
         

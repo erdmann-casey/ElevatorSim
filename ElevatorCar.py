@@ -27,45 +27,39 @@ class ElevatorCar(ElevatorComponent):
         self.oReqMsg = msg
         # Generate oReqMsg log
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Button","Elevator Car","R", self.oReqMsg.contents)
+        
+        # Generate oReq log
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Request Proc","S", self.oReqMsg.contents)
+
+        # Send oReq
+        self.oReq.send(self.oReqMsg)
 
     def setoStCarMsg(self, msg):
         self.oStCarMsg = msg
         # Generate oStCarMsg log
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStCarMsg.contents)
+        
+        # Generate oStCar log
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Elevator Ctrl","S", self.oStCarMsg.contents)
+                
+        # Send oStCar
+        self.oStCar.send(self.oStCarMsg)
 
     def setoStDoorMsg(self, msg):
         self.oStDoorMsg = msg
         # Generate oStDoorMsg log
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","R", self.oStDoorMsg.contents)
+        
+        
+        # Generate oStDoor log
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Door Status Proc","S", self.oStDoorMsg.contents)
+               
+        # Send oStDoor
+        self.oStDoor.send(self.oStDoorMsg)
 
 
     def state_processor(self):
-        pass
-
-    def main(self):
-        while True:
-            # Send output
-            if(self.oReqMsg):
-                # Send oReq
-                self.oReq.send(self.oReqMsg)
-
-                # Generate oReq log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Request Proc","S", self.oReqMsg.contents)
-
-                
-            if(self.oStCarMsg):
-                # Send oStCar
-                self.oStCar.send(self.oStCarMsg)
-                # Generate oStCar log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Elevator Ctrl","S", self.oStCarMsg.contents)
-                
-            if(self.oStDoorMsg):
-                # Send oStDoor
-                self.oStDoor.send(self.oStDoorMsg)
-
-                # Generate oStDoor log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Car","Door Status Proc","S", self.oStDoorMsg.contents)
-               
+         while True:
             # Get iCmd
             try:
                 job = self.iCmd.recv()
@@ -75,6 +69,9 @@ class ElevatorCar(ElevatorComponent):
                 self.ctrl.setIN(job)
             except EOFError:
                 pass
+
+    def main(self):
+       self.state_processor()
 
 
 
