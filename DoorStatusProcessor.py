@@ -31,7 +31,7 @@ class DoorStatusProcessor(ElevatorComponent):
         # component vars
         self.doors = {}   # Map<int, StatusDoor>
         self.curFloor = None  # int
-        self.state = STATE.BUSY
+        self.state = STATE.DONE
         self.floorDoorStatus = None
         self.carDoorStatus = None
 
@@ -109,7 +109,8 @@ class DoorStatusProcessor(ElevatorComponent):
     def state_processor(self):
         while True:
             if self.state == STATE.BUSY:
-                if self.poll_iStFloor(self.curFloor) and self.iStCar.poll():
+                if self.iStCar.poll():  # self.poll_iStFloor(self.curFloor) and self.iStCar.poll():
+                    print("DOOR STATUS PROC in BUSY received POLL SUCCESS from iStCar")
                     self.receive_iStCar()
                     self.receive_iStFloor(self.curFloor)
 
