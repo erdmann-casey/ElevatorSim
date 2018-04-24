@@ -32,35 +32,30 @@ class CarDoor(ElevatorComponent):
         self.processing_time = 5.0
         self.motion_time = 3.0
     
-
-        
+    def setIN(self, IN):
+        # in ? job && cmdDoor == OPEN
+            # Above Met: MoveTo STATE.OPENING
+        if(self.IN):
+            if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+                self.state = STATE.OPENING
+                        
+                # Generate IN Log 
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","R",self.IN.contents)
+                
+                # in ? job && cmdDoor == CLOSE
+                # Above Met: MoveTo STATE.CLOSING
+            elif(self.IN.contents['content'] == CommandDoor.DOOR_CAR_CLOSE):
+                self.state = STATE.CLOSING
+                # Generate IN Log 
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","R",self.IN.contents)
+                        
 
     def state_processor(self):
         while True:
             if self.state == STATE.CLOSED:
-                # in ? job && cmdDoor == OPEN
-                    # Above Met: MoveTo STATE.OPENING
 
-                if(self.IN):
-                    if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
-                        self.state = STATE.OPENING
-                        
-                        # Generate IN Log 
-                        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","R",self.IN.contents)
-
-
-                        # Generate IN Status Log 
-
-                        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C",self.IN.contents)
-
-                    # in ? job && cmdDoor == CLOSE
-                        # Above Met: MoveTo STATE.CLOSING
-                    elif(self.IN.contents['content'] == CommandDoor.DOOR_CAR_CLOSE):
-                        self.state = STATE.CLOSING
-                        # Generate IN Log 
-                        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","R",self.IN.contents)
-                        
-                        # Generate IN Status Log 
+                    # Generate IN Status Log 
+                    if(self.IN):
                         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C",self.IN.contents)
                
             elif self.state == STATE.OPENING:

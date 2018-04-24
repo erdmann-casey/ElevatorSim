@@ -62,6 +62,8 @@ class CarCtrl(ElevatorComponent):
         
         # Generate iMotor Log 
         self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","Car Ctrl","R", self.iMotor.contents)
+        
+        self.motorStatus = self.iMotor.contents['content']
 
     
     def setiDoor(self, iDoor): 
@@ -69,27 +71,21 @@ class CarCtrl(ElevatorComponent):
  
         # Generate iDoor Log 
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Car Ctrl","R", self.iDoor.contents)
+        
+        self.doorStatus = self.iDoor.contents['content']
 
     def setIN(self, IN):
         self.IN = IN 
 
+        if(isinstance(self.IN, MsgCar)):
+            self.curFloor = self.IN.contents['pos']
+            self.destFloor = self.IN.contents['dest']
         # Generate IN Log 
         self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Car Ctrl","R", self.IN.contents)
 
     def state_processor(self):
         while True:
-
-            if(isinstance(self.IN, MsgCar)):
-                self.curFloor = self.IN.contents['pos']
-                self.destFloor = self.IN.contents['dest']
             
-            if(self.iDoor):
-                self.doorStatus = self.iDoor.contents['content']
-            
-            if(self.iMotor):
-                self.motorStatus = self.iMotor.contents['content']
-
-
             if self.state == STATE.IDLE:
                 # in ? msgDoor && cmdDoor == OPEN 
                     # Above Met: MoveTo STATE.OPENING_DOOR
@@ -117,7 +113,7 @@ class CarCtrl(ElevatorComponent):
 
                 # Generate oDoor Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
-                self.car.setoStDoorMsg(self.oDoor)
+                self.door.setIN(self.oDoor)
 
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_OPENING, self.curFloor, self.destFloor, False)
@@ -156,7 +152,7 @@ class CarCtrl(ElevatorComponent):
 
                 # Generate oDoor Status Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
-                self.car.setoStDoorMsg(self.oDoor)
+                self.door.setIN(self.oDoor)
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 
