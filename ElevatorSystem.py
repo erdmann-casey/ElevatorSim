@@ -23,16 +23,14 @@ class ElevatorSystem(object):
         self.doorStatusProc = DoorStatusProcessor()
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
-        self.elevCar = ElevatorCar(None, None, None)
+        self.elevCar = ElevatorCar(None)
         self.elevCarCtrl = CarCtrl(None, None, None)
         self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
         self.elevCarBtn = CarBtn(self.elevCar)
         self.elevCarMotor = Motor(self.elevCarCtrl)
 
         self.elevCar.ctrl = self.elevCarCtrl
-        self.elevCar.motor = self.elevCarMotor
-        self.elevCar.door = self.elevCarDoor
-
+        
         self.elevCarCtrl.car = self.elevCar
         self.elevCarCtrl.door = self.elevCarDoor
         self.elevCarCtrl.motor = self.elevCarMotor

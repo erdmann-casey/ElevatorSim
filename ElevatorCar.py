@@ -5,7 +5,7 @@ from Messages import *
 
 class ElevatorCar(ElevatorComponent):
 
-    def __init__(self, CarCtrl, Motor, CarDoor):
+    def __init__(self, CarCtrl):
         super().__init__()
         # input
         self.iCmd = None    # Received from Elevator Controller
@@ -22,8 +22,6 @@ class ElevatorCar(ElevatorComponent):
 
         # Coupled Input/Output: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
         self.ctrl = CarCtrl
-        self.motor = Motor
-        self.door = CarDoor
 
         
     def setoReqMsg(self, msg):
@@ -83,7 +81,5 @@ class ElevatorCar(ElevatorComponent):
 
 if __name__ == '__main__':
     ctrl = None
-    motor = None
-    door = None
-    car = ElevatorCar(ctrl, motor, door)
+    car = ElevatorCar(ctrl)
     car.main()
