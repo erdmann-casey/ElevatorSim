@@ -82,27 +82,26 @@ class CarCtrl(ElevatorComponent):
             self.destFloor = self.IN.contents['dest']
         # Generate IN Log 
         self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Car Ctrl","R", self.IN.contents)
+        
+        # in ? msgDoor && cmdDoor == OPEN 
+            # Above Met: MoveTo STATE.OPENING_DOOR
+
+        if(self.IN):
+            if(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+                self.state = STATE.OPENING_DOOR
+                    
+            # in ? en && cmdCar == MOVE
+                # Above Met: MoveTo STATE.PREP_TO_CLOSE
+            elif(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
+                self.state = STATE.PREP_TO_CLOSE
+
 
     def state_processor(self):
         while True:
             
             if self.state == STATE.IDLE:
-                # in ? msgDoor && cmdDoor == OPEN 
-                    # Above Met: MoveTo STATE.OPENING_DOOR
-
-                if(self.IN):
-                    if(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
-                        self.state = STATE.OPENING_DOOR
-                    
-                    # in ? en && cmdCar == MOVE
-                        # Above Met: MoveTo STATE.PREP_TO_CLOSE
-                    elif(self.IN.contents['isCommand'] and self.IN.contents['content'] == CommandCar.CAR_MOVE):
-                        self.state = STATE.PREP_TO_CLOSE
-
-                    # Elevator Car is idle, set operating to False
-                    self.operating = False
-
-                
+                # Elevator Car is idle, set operating to False
+                self.operating = False
             
             elif self.state == STATE.OPENING_DOOR:
                 # Send message MsgDoor -> oDoor
@@ -138,11 +137,11 @@ class CarCtrl(ElevatorComponent):
 
             elif self.state == STATE.CLOSING:
                 # MoveTo STATE.PREP_TO_CLOSE
-                
+
                 # Generate Closing Status Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", STATE.CLOSING)
 
-                self.state == STATE.PREP_TO_CLOSE
+                self.state = STATE.PREP_TO_CLOSE
 
             elif self.state == STATE.PREP_TO_CLOSE:
                 # Send message MsgDoor -> oDoor
