@@ -116,7 +116,7 @@ class CarCtrl(ElevatorComponent):
                 self.oDoor = MsgDoor(StatusDoor.DOOR_CAR_OPENED, self.curFloor, False)
 
                 # Generate Opening Status Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
+                # TODO: self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
 
                 self.oDoor = MsgDoor(CommandDoor.DOOR_CAR_OPEN, self.curFloor, False)
                 # Generate oDoor Log 
@@ -142,13 +142,13 @@ class CarCtrl(ElevatorComponent):
                         self.state = STATE.CLOSING
                     
                     # Generate Opened Status Log 
-                    self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.iDoor.contents)
+                    # TODO: self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.iDoor.contents)
 
             elif self.state == STATE.CLOSING:
                 # MoveTo STATE.PREP_TO_CLOSE
 
                 # Generate Closing Status Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", STATE.CLOSING)
+                # TODO: self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", STATE.CLOSING)
 
                 self.state = STATE.PREP_TO_CLOSE
 
@@ -156,7 +156,7 @@ class CarCtrl(ElevatorComponent):
                 # Send message MsgDoor -> oDoor
                 self.oDoor = MsgDoor(StatusDoor.DOOR_CAR_CLOSED, self.curFloor, False)
                 # Generate Closing Status Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
+                # TODO: self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
 
                 # Generate oDoor Status Log 
                 self.oDoor = MsgDoor(CommandDoor.DOOR_CAR_CLOSE, self.curFloor, False)
@@ -181,7 +181,7 @@ class CarCtrl(ElevatorComponent):
                         self.state = STATE.PREP_TO_MOVE
                     
                     # Generate Closing Status Log 
-                    self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.iDoor.contents)
+                    # TODO: self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.iDoor.contents)
 
                 
             elif self.state == STATE.PREP_TO_MOVE:

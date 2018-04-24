@@ -63,7 +63,7 @@ class FloorDoor(ElevatorComponent):
                     self.job = None
                     self.open_door()
                     """
-                    if self.state is STATE.OPENED:
+                    if self.state == STATE.OPENED:
                         continue
                     else:
                         self.open_door()
@@ -74,7 +74,7 @@ class FloorDoor(ElevatorComponent):
                     self.job = None
                     self.close_door()
                     """
-                    if self.state is STATE.CLOSED:
+                    if self.state == STATE.CLOSED:
                         continue
                     else:
                         self.close_door()

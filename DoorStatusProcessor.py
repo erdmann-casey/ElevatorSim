@@ -41,39 +41,44 @@ class DoorStatusProcessor(ElevatorComponent):
         self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "DoorStatusProc", "R", self.iStCar_msg.contents)
 
     def poll_iStFloor(self, floor_no):
-        if floor_no is 1:
+        if floor_no == 1:
             return self.iStFloor1.poll()
-        elif floor_no is 2:
+        elif floor_no == 2:
             return self.iStFloor2.poll()
-        elif floor_no is 3:
+        elif floor_no == 3:
             return self.iStFloor3.poll()
-        elif floor_no is 4:
+        elif floor_no == 4:
             return self.iStFloor4.poll()
-        elif floor_no is 5:
+        elif floor_no == 5:
             return self.iStFloor5.poll()
         else:
             return False
 
     def receive_iStFloor(self, floor_no):
-        if floor_no is 1:
+        if floor_no == 1:
             self.iStFloor_msg[1] = self.iStFloor1.recv()
             self.doors[1] = self.iStFloor_msg[1].contents.get("content")
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "DoorStatusProc", "R", self.iStFloor_msg[1].contents)
 
-        elif floor_no is 2:
+        elif floor_no == 2:
             self.iStFloor_msg[2] = self.iStFloor2.recv()
             self.doors[2] = self.iStFloor_msg[2].contents.get("content")
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "DoorStatusProc", "R", self.iStFloor_msg[2].contents)
 
-        elif floor_no is 3:
+        elif floor_no == 3:
             self.iStFloor_msg[3] = self.iStFloor3.recv()
             self.doors[3] = self.iStFloor_msg[3].contents.get("content")
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "DoorStatusProc", "R", self.iStFloor_msg[3].contents)
 
-        elif floor_no is 4:
+        elif floor_no == 4:
             self.iStFloor_msg[4] = self.iStFloor4.recv()
             self.doors[4] = self.iStFloor_msg[4].contents.get("content")
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "DoorStatusProc", "R", self.iStFloor_msg[4].contents)
 
-        elif floor_no is 5:
+        elif floor_no == 5:
             self.iStFloor_msg[5] = self.iStFloor5.recv()
             self.doors[5] = self.iStFloor_msg[5].contents.get("content")
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "DoorStatusProc", "R", self.iStFloor_msg[5].contents)
 
     def receive_iStFloor_all(self):
         if self.iStFloor1.poll():
@@ -109,23 +114,26 @@ class DoorStatusProcessor(ElevatorComponent):
     def state_processor(self):
         while True:
             if self.state == STATE.BUSY:
-                if self.iStCar.poll():  # self.poll_iStFloor(self.curFloor) and self.iStCar.poll():
-                    print("DOOR STATUS PROC in BUSY received POLL SUCCESS from iStCar")
+                if self.poll_iStFloor(self.curFloor) and self.iStCar.poll():
                     self.receive_iStCar()
                     self.receive_iStFloor(self.curFloor)
+                    print("Received Door States...")
 
-                    if self.doors[self.curFloor] is StatusDoor.DOOR_FLOOR_CLOSED and self.doors[0] is StatusDoor.DOOR_CAR_CLOSED:
+                    if self.doors[self.curFloor] == StatusDoor.DOOR_FLOOR_CLOSED and self.doors[0] == StatusDoor.DOOR_CAR_CLOSED:
+                        print("----Door States synchronized!!----")
                         self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_CLOSED, self.curFloor, False))
                         self.curFloor = None
                         self.change_state(STATE.DONE)
                         continue
 
-                    elif self.doors[self.curFloor] is StatusDoor.DOOR_FLOOR_OPENED and self.doors[0] is StatusDoor.DOOR_CAR_OPENED:
+                    elif self.doors[self.curFloor] == StatusDoor.DOOR_FLOOR_OPENED and self.doors[0] == StatusDoor.DOOR_CAR_OPENED:
+                        print("----Door States synchronized!!----")
                         self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_OPENED, self.curFloor, False))
                         self.curFloor = None
                         self.change_state(STATE.DONE)
                         continue
                     else:
+                        print("----Door States NOT synchronized!!----")
                         continue
                 else:
                     continue

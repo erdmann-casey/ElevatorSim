@@ -36,41 +36,41 @@ class RequestProcessor(ElevatorComponent):
         self.state = STATE.PASSIVE   # state is inherited from ElevatorComponent
 
     def poll_input(self, id):
-        if id is 0:
+        if id == 0:
             return self.input_car.poll()
-        if id is 1:
+        if id == 1:
             return self.input_floor1.poll()
-        if id is 2:
+        if id == 2:
             return self.input_floor2.poll()
-        if id is 3:
+        if id == 3:
             return self.input_floor3.poll()
-        if id is 4:
+        if id == 4:
             return self.input_floor4.poll()
-        if id is 5:
+        if id == 5:
             return self.input_floor5.poll()
 
     def receive_input(self, id):
-        if id is 0:
+        if id == 0:
             self.in_msg[id] = self.input_car.recv()
             self.q.put(self.in_msg[id])
             self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "RequestProc", "R", self.in_msg[id].contents)
-        if id is 1:
+        if id == 1:
             self.in_msg[id] = self.input_floor1.recv()
             self.q.put(self.in_msg[id])
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "RequestProc", "R", self.in_msg[id].contents)
-        if id is 2:
+        if id == 2:
             self.in_msg[id] = self.input_floor2.recv()
             self.q.put(self.in_msg[id])
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "RequestProc", "R", self.in_msg[id].contents)
-        if id is 3:
+        if id == 3:
             self.in_msg[id] = self.input_floor3.recv()
             self.q.put(self.in_msg[id])
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "RequestProc", "R", self.in_msg[id].contents)
-        if id is 4:
+        if id == 4:
             self.in_msg[id] = self.input_floor4.recv()
             self.q.put(self.in_msg[id])
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "RequestProc", "R", self.in_msg[id].contents)
-        if id is 5:
+        if id == 5:
             self.in_msg[id] = self.input_floor5.recv()
             self.q.put(self.in_msg[id])
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "RequestProc", "R", self.in_msg[id].contents)
@@ -96,7 +96,7 @@ class RequestProcessor(ElevatorComponent):
 
     def state_processor(self):
         while True:
-            if self.state is STATE.PASSIVE:
+            if self.state == STATE.PASSIVE:
                 self.receive_input_all()
 
                 if self.q.empty():
@@ -107,7 +107,7 @@ class RequestProcessor(ElevatorComponent):
                     self.change_state(STATE.SEND_JOB)
                     continue
 
-            elif self.state is STATE.SEND_JOB:
+            elif self.state == STATE.SEND_JOB:
                 if not self.q.empty():
                     self.job = self.q.get()
                     self.send_out(self.job)
@@ -115,7 +115,7 @@ class RequestProcessor(ElevatorComponent):
                     self.change_state(STATE.BUSY)
                     continue
 
-            elif self.state is STATE.BUSY:
+            elif self.state == STATE.BUSY:
                 self.receive_input_all()
 
                 if self.q.empty():

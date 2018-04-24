@@ -53,10 +53,10 @@ class CarDoor(ElevatorComponent):
     def state_processor(self):
         while True:
             if self.state == STATE.CLOSED:
-
+                pass
                     # Generate IN Status Log 
-                    if(self.IN):
-                        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C",self.IN.contents)
+                    # TODO: if(self.IN):
+                        # TODO: self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C",self.IN.contents)
                
             elif self.state == STATE.OPENING:
                 # Send message MsgDoor -> OUT
