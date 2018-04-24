@@ -1,10 +1,11 @@
 from ElevatorComponent import ElevatorComponent
+from threading import Thread
 from Messages import *
 
 
 class ElevatorCar(ElevatorComponent):
 
-    def __init__(self, CarCtrl):
+    def __init__(self, CarCtrl, Motor, CarDoor):
         super().__init__()
         # input
         self.iCmd = None    # Received from Elevator Controller
@@ -21,6 +22,8 @@ class ElevatorCar(ElevatorComponent):
 
         # Coupled Input/Output: iCmd goes to "in" on the CarCtrl so we need an instance of the CarCtrl
         self.ctrl = CarCtrl
+        self.motor = Motor
+        self.door = CarDoor
 
         
     def setoReqMsg(self, msg):
@@ -59,7 +62,10 @@ class ElevatorCar(ElevatorComponent):
 
 
     def state_processor(self):
-         while True:
+        thread_carCtrl = Thread(target = self.ctrl.state_processor, args = ())
+        thread_carCtrl.start()
+        
+        while True:
             # Get iCmd
             try:
                 job = self.iCmd.recv()
@@ -77,5 +83,7 @@ class ElevatorCar(ElevatorComponent):
 
 if __name__ == '__main__':
     ctrl = None
-    car = ElevatorCar(ctrl)
+    motor = None
+    door = None
+    car = ElevatorCar(ctrl, motor, door)
     car.main()

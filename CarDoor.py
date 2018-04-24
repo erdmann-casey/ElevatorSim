@@ -35,6 +35,7 @@ class CarDoor(ElevatorComponent):
     def setIN(self, IN):
         # in ? job && cmdDoor == OPEN
             # Above Met: MoveTo STATE.OPENING
+        self.IN = IN
         if(self.IN):
             if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
                 self.state = STATE.OPENING
@@ -48,7 +49,6 @@ class CarDoor(ElevatorComponent):
                 self.state = STATE.CLOSING
                 # Generate IN Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","R",self.IN.contents)
-                        
 
     def state_processor(self):
         while True:

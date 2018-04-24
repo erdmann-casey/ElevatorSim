@@ -1,4 +1,5 @@
 from ElevatorComponent import ElevatorComponent
+from threading import Thread
 from Messages import *
 
 class STATE(Enum):
@@ -97,6 +98,13 @@ class CarCtrl(ElevatorComponent):
 
 
     def state_processor(self):
+
+        thread_Motor = Thread(target = self.motor.state_processor, args = ())
+        thread_Motor.start()
+        
+        thread_CarDoor = Thread(target = self.door.state_processor, args = ())
+        thread_CarDoor.start()
+
         while True:
             
             if self.state == STATE.IDLE:
@@ -110,6 +118,7 @@ class CarCtrl(ElevatorComponent):
                 # Generate Opening Status Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
 
+                self.oDoor = MsgDoor(CommandDoor.DOOR_CAR_OPEN, self.curFloor, False)
                 # Generate oDoor Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
                 self.door.setIN(self.oDoor)
@@ -150,6 +159,7 @@ class CarCtrl(ElevatorComponent):
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
 
                 # Generate oDoor Status Log 
+                self.oDoor = MsgDoor(CommandDoor.DOOR_CAR_CLOSE, self.curFloor, False)
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
                 self.door.setIN(self.oDoor)
                 # Send message MsgCar -> oSt

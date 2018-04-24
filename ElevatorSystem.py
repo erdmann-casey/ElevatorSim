@@ -23,13 +23,16 @@ class ElevatorSystem(object):
         self.doorStatusProc = DoorStatusProcessor()
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
-        self.elevCar = ElevatorCar(None)
+        self.elevCar = ElevatorCar(None, None, None)
         self.elevCarCtrl = CarCtrl(None, None, None)
         self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
         self.elevCarBtn = CarBtn(self.elevCar)
         self.elevCarMotor = Motor(self.elevCarCtrl)
 
         self.elevCar.ctrl = self.elevCarCtrl
+        self.elevCar.motor = self.elevCarMotor
+        self.elevCar.door = self.elevCarDoor
+
         self.elevCarCtrl.car = self.elevCar
         self.elevCarCtrl.door = self.elevCarDoor
         self.elevCarCtrl.motor = self.elevCarMotor
@@ -85,10 +88,10 @@ class ElevatorSystem(object):
 
     def start_elevator_system(self):
         self.elevCar.start()
-        self.elevCarCtrl.start()
-        self.elevCarDoor.start()
+        #self.elevCarCtrl.start()
+        #self.elevCarDoor.start()
         self.elevCarBtn.start()
-        self.elevCarMotor.start()
+        #self.elevCarMotor.start()
         self.elevController.start()
         self.requestProc.start()
         self.doorStatusProc.start()
@@ -160,12 +163,12 @@ class ElevatorSystem(object):
     def check_all_processes_live(self):
         if not self.elevCar.is_alive():
             print("ElevCar Process Not Running!!")
-        if not self.elevCarCtrl.is_alive():
-            print("ElevCarCtrl Process Not Running!!")
-        if not self.elevCarDoor.is_alive():
-            print("ElevCarDoor Process Not Running!!")
-        if not self.elevCarMotor.is_alive():
-            print("ElevCarMotor Process Not Running!!")
+        #if not self.elevCarCtrl.is_alive():
+            #print("ElevCarCtrl Process Not Running!!")
+        #if not self.elevCarDoor.is_alive():
+            #print("ElevCarDoor Process Not Running!!")
+        #if not self.elevCarMotor.is_alive():
+            #print("ElevCarMotor Process Not Running!!")
         if not self.doorStatusProc.is_alive():
             print("DoorStatusProc Process Not Running!!")
         if not self.elevController.is_alive():
