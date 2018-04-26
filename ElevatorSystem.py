@@ -94,7 +94,7 @@ class ElevatorSystem(object):
         self.requestProc.start()
         self.doorStatusProc.start()
         # Floors
-        for num in range(5):
+        for num in range(6):
             if num is 0:
                 continue
             else:
