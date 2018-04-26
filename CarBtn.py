@@ -16,7 +16,7 @@ class CarBtn(ElevatorComponent):
 
     def press(self, id):
         # Send Message MsgReq -> OUT
-        self.OUT = MsgReq(id)
+        self.OUT = MsgReq("out", id)
 
         # Generate button pressed log
         self.write_log(self.get_sim_time(), self.get_real_time(),"Car Btn","Elevator Car","S",self.OUT.contents)

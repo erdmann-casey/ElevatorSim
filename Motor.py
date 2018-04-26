@@ -37,18 +37,18 @@ class Motor(ElevatorComponent):
                 if(self.IN):
                     self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Motor","R",self.IN.contents)
 
-                    if(self.IN.contents['content'] == StatusMotor.MOTOR_MOVING):
+                    if(self.IN.contents["value"] == StatusMotor.MOTOR_MOVING):
                         self.state = STATE.BUSY
                         # Generate Status log
                         self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
-                    elif(self.IN.contents['content'] == StatusMotor.MOTOR_REACHED):
+                    elif(self.IN.contents["value"] == StatusMotor.MOTOR_REACHED):
                         self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
 
 
                 
             elif self.state == STATE.BUSY:
                 # Send message MsgMotor -> OUT
-                self.OUT = MsgMotor(StatusMotor.MOTOR_MOVING)
+                self.OUT = MsgMotor("out", StatusMotor.MOTOR_MOVING)
 
                 self.ctrl.setiMotor(self.OUT)
 

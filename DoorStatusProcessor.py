@@ -37,7 +37,7 @@ class DoorStatusProcessor(ElevatorComponent):
 
     def receive_iStCar(self):
         self.iStCar_msg = self.iStCar.recv()
-        self.doors[0] = self.iStCar_msg.contents.get("content")  # Index 0 reserved for Car Door
+        self.doors[0] = self.iStCar_msg.contents.get("value")  # Index 0 reserved for Car Door
         self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "DoorStatusProc", "R", self.iStCar_msg.contents)
 
     def poll_iStFloor(self, floor_no):
@@ -57,49 +57,49 @@ class DoorStatusProcessor(ElevatorComponent):
     def receive_iStFloor(self, floor_no):
         if floor_no == 1:
             self.iStFloor_msg[1] = self.iStFloor1.recv()
-            self.doors[1] = self.iStFloor_msg[1].contents.get("content")
+            self.doors[1] = self.iStFloor_msg[1].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "DoorStatusProc", "R", self.iStFloor_msg[1].contents)
 
         elif floor_no == 2:
             self.iStFloor_msg[2] = self.iStFloor2.recv()
-            self.doors[2] = self.iStFloor_msg[2].contents.get("content")
+            self.doors[2] = self.iStFloor_msg[2].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "DoorStatusProc", "R", self.iStFloor_msg[2].contents)
 
         elif floor_no == 3:
             self.iStFloor_msg[3] = self.iStFloor3.recv()
-            self.doors[3] = self.iStFloor_msg[3].contents.get("content")
+            self.doors[3] = self.iStFloor_msg[3].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "DoorStatusProc", "R", self.iStFloor_msg[3].contents)
 
         elif floor_no == 4:
             self.iStFloor_msg[4] = self.iStFloor4.recv()
-            self.doors[4] = self.iStFloor_msg[4].contents.get("content")
+            self.doors[4] = self.iStFloor_msg[4].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "DoorStatusProc", "R", self.iStFloor_msg[4].contents)
 
         elif floor_no == 5:
             self.iStFloor_msg[5] = self.iStFloor5.recv()
-            self.doors[5] = self.iStFloor_msg[5].contents.get("content")
+            self.doors[5] = self.iStFloor_msg[5].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "DoorStatusProc", "R", self.iStFloor_msg[5].contents)
 
     def receive_iStFloor_all(self):
         if self.iStFloor1.poll():
             self.iStFloor_msg[1] = self.iStFloor1.recv()
-            self.doors[1] = self.iStFloor_msg[1].contents.get("content")
+            self.doors[1] = self.iStFloor_msg[1].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "DoorStatusProc", "R", self.iStFloor_msg[1].contents)
         if self.iStFloor2.poll():
             self.iStFloor_msg[2] = self.iStFloor2.recv()
-            self.doors[2] = self.iStFloor_msg[2].contents.get("content")
+            self.doors[2] = self.iStFloor_msg[2].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "DoorStatusProc", "R", self.iStFloor_msg[2].contents)
         if self.iStFloor3.poll():
             self.iStFloor_msg[3] = self.iStFloor3.recv()
-            self.doors[3] = self.iStFloor_msg[3].contents.get("content")
+            self.doors[3] = self.iStFloor_msg[3].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "DoorStatusProc", "R", self.iStFloor_msg[3].contents)
         if self.iStFloor4.poll():
             self.iStFloor_msg[4] = self.iStFloor4.recv()
-            self.doors[4] = self.iStFloor_msg[4].contents.get("content")
+            self.doors[4] = self.iStFloor_msg[4].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "DoorStatusProc", "R", self.iStFloor_msg[4].contents)
         if self.iStFloor5.poll():
             self.iStFloor_msg[5] = self.iStFloor5.recv()
-            self.doors[5] = self.iStFloor_msg[5].contents.get("content")
+            self.doors[5] = self.iStFloor_msg[5].contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "DoorStatusProc", "R", self.iStFloor_msg[5].contents)
 
     def receive_input(self):
@@ -120,14 +120,14 @@ class DoorStatusProcessor(ElevatorComponent):
 
                 if self.doors.get(self.curFloor) == StatusDoor.DOOR_FLOOR_CLOSED and self.doors.get(0) == StatusDoor.DOOR_CAR_CLOSED:
                     print("----Door States synchronized!!----")
-                    self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_CLOSED, self.curFloor, False))
+                    self.send_out(MsgDoor("out", StatusDoor.DOOR_BOTH_CLOSED, self.curFloor, False))
                     self.curFloor = None
                     self.change_state(STATE.DONE)
                     continue
 
                 elif self.doors.get(self.curFloor) == StatusDoor.DOOR_FLOOR_OPENED and self.doors.get(0) == StatusDoor.DOOR_CAR_OPENED:
                     print("----Door States synchronized!!----")
-                    self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_OPENED, self.curFloor, False))
+                    self.send_out(MsgDoor("out", StatusDoor.DOOR_BOTH_OPENED, self.curFloor, False))
                     self.curFloor = None
                     self.change_state(STATE.DONE)
                     continue

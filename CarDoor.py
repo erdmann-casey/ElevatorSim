@@ -37,7 +37,7 @@ class CarDoor(ElevatorComponent):
             # Above Met: MoveTo STATE.OPENING
         self.IN = IN
         if(self.IN):
-            if(self.IN.contents['content'] == CommandDoor.DOOR_CAR_OPEN):
+            if(self.IN.contents["value"] == CommandDoor.DOOR_CAR_OPEN):
                 self.state = STATE.OPENING
                         
                 # Generate IN Log 
@@ -45,7 +45,7 @@ class CarDoor(ElevatorComponent):
                 
                 # in ? job && cmdDoor == CLOSE
                 # Above Met: MoveTo STATE.CLOSING
-            elif(self.IN.contents['content'] == CommandDoor.DOOR_CAR_CLOSE):
+            elif(self.IN.contents["value"] == CommandDoor.DOOR_CAR_CLOSE):
                 self.state = STATE.CLOSING
                 # Generate IN Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","R",self.IN.contents)
@@ -60,7 +60,7 @@ class CarDoor(ElevatorComponent):
                
             elif self.state == STATE.OPENING:
                 # Send message MsgDoor -> OUT
-                self.OUT = MsgDoor(StatusDoor.DOOR_CAR_OPENED, 100, False)
+                self.OUT = MsgDoor("out", StatusDoor.DOOR_CAR_OPENED, 100, False)
 
                 # MoveTo STATE.OPENED
                 self.state = STATE.OPENED
@@ -81,7 +81,7 @@ class CarDoor(ElevatorComponent):
                 
             elif self.state == STATE.CLOSING:
                 # Send message MsgDoor -> OUT
-                self.OUT = MsgDoor(StatusDoor.DOOR_CAR_CLOSED, 100, False)
+                self.OUT = MsgDoor("out", StatusDoor.DOOR_CAR_CLOSED, 100, False)
                 # MoveTo STATE.CLOSED
                 self.state = STATE.CLOSED
 

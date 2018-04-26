@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class Msg(object):
-    def __init__(self, content):
-        self.contents = {"content": content}
+    def __init__(self, port, content):
+        self.contents = {"port": port, "value": content}
 
 
 class Command(object):
@@ -30,8 +30,8 @@ class StatusCar(Status):
 
 class MsgCar(Msg):
 
- def __init__(self, content, pos, dest, isCommand):
-        self.contents = {"content": content, "pos": pos, "dest": dest, "isCommand": isCommand}
+ def __init__(self, port, content, pos, dest, isCommand):
+        self.contents = {"port": port, "value": content, "pos": pos, "dest": dest, "isCommand": isCommand}
     
 
 class CommandDoor(Command):
@@ -51,8 +51,8 @@ class StatusDoor(Status):
 
 
 class MsgDoor(Msg):
-    def __init__(self, content, floor_id, isCommand):
-        self.contents = {"content": content, "id": floor_id, "isCommand": isCommand}
+    def __init__(self, port, content, floor_id, isCommand):
+        self.contents = {"port": port, "value": content, "id": floor_id, "isCommand": isCommand}
 
 
 class CommandMotor(Command):
@@ -67,8 +67,8 @@ class StatusMotor(Status):
 
 
 class MsgMotor(Msg):
-    def __init__(self, content):
-        self.contents = {"content": content}
+    def __init__(self, port, content):
+        self.contents = {"port": port, "value": content}
 
 
 class CommandReq(Command):
@@ -77,8 +77,8 @@ class CommandReq(Command):
 
 class MsgReq(Msg):
     
-    def __init__(self, dest):
-        self.contents = {"REQ": dest}
+    def __init__(self, port, dest):
+        self.contents = {"port": port, "REQ": dest}
 
 
 class CommandElev(Command):
@@ -87,8 +87,8 @@ class CommandElev(Command):
 
 class MsgElev(Msg):
 
-    def __init__(self, content):
-        self.contents = {"ELEV": content}
+    def __init__(self, port, content):
+        self.contents = {"port": port, "ELEV": content}
 
 
 class CommandFloor(Command):
@@ -99,5 +99,5 @@ class CommandFloor(Command):
 
 class MsgFloor(Msg):
 
-    def __init__(self, content, floor_id):
-        self.contents = {"CommandDoor": content, "id": floor_id}
+    def __init__(self, port, content, floor_id):
+        self.contents = {"port": port, "value": content, "id": floor_id}

@@ -28,9 +28,9 @@ class ElevatorController(ElevatorComponent):
         self.iStCar = None   # Received from Elevator Car
         self.iStDoor = None  # Received from Door Status Processor
         # Received Messages
-        self.iReq_msg = Msg(None)
-        self.iStCar_msg = Msg(None)
-        self.iStDoor_msg = Msg(None)
+        self.iReq_msg = None
+        self.iStCar_msg = None
+        self.iStDoor_msg = None
         # output
         self.oCmdCar = None    # Recipient is Elevator Car
         self.oCmdFloor1 = None  # Recipient is Floor(s)
@@ -67,7 +67,7 @@ class ElevatorController(ElevatorComponent):
     def receive_iStCar(self):
         if self.iStCar.poll():
             self.iStCar_msg = self.iStCar.recv()
-            self.statusCar = self.iStCar_msg.contents.get("content")
+            self.statusCar = self.iStCar_msg.contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "ElevCtrl", "R", self.iStCar_msg.contents)
             return True
         else:
@@ -76,7 +76,7 @@ class ElevatorController(ElevatorComponent):
     def receive_iStDoor(self):
         if self.iStDoor.poll():
             self.iStDoor_msg = self.iStDoor.recv()
-            self.statusDoor = self.iStDoor_msg.contents.get("content")
+            self.statusDoor = self.iStDoor_msg.contents.get("value")
             self.write_log(self.get_sim_time(), self.get_real_time(), "DoorStatusProc", "ElevCtrl", "R", self.iStDoor_msg.contents)
             return True
         else:
@@ -121,18 +121,18 @@ class ElevatorController(ElevatorComponent):
                 if self.receive_iReq():
                     if self.curFloor == self.destFloor:
                         continue
-                    if not self.isOperating and self.reset == True:
+                    if not self.isOperating and self.reset is True:
                         self.change_state(STATE.MOVE)
                         continue
-                    elif not self.isOperating and self.reset == False:
+                    elif not self.isOperating and self.reset is False:
                         self.change_state(STATE.STOP)
                         continue
 
             if self.state == STATE.MOVE:
                 self.reset = False
-                self.send_oCmdCar(MsgCar(CommandCar.CAR_MOVE, self.curFloor, self.destFloor, True))
-                self.send_oCmdFloor(self.destFloor, MsgDoor(CommandDoor.DOOR_FLOOR_X_CLOSE, self.destFloor, True))
-                self.send_out(MsgElev(self.destFloor))
+                self.send_oCmdCar(MsgCar("oCmdCar", CommandCar.CAR_MOVE, self.curFloor, self.destFloor, True))
+                self.send_oCmdFloor(self.destFloor, MsgDoor("oCmdFloor", CommandDoor.DOOR_FLOOR_X_CLOSE, self.destFloor, True))
+                self.send_out(MsgElev("out", self.destFloor))
                 self.change_state(STATE.WAIT_FOR_CAR_READY)
                 continue
 
@@ -142,24 +142,23 @@ class ElevatorController(ElevatorComponent):
                 if self.iStCar.poll():
                     self.receive_iStCar()
 
-                # print("ElevCtrl Received: {} from iStDoor\nElevCtrl Received: {} from iStCar\n".format(self.iStDoor_msg.contents.get("content"), self.iStCar_msg.contents.get("content")))
-
-                if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_READY_TO_MOVE and self.isGoUp:
-                    self.change_state(STATE.MOVE_UP)
-                    continue
-                elif self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_READY_TO_MOVE and self.isGoDown:
-                    self.change_state(STATE.MOVE_DOWN)
-                    continue
+                if self.iStDoor_msg is not None and self.iStCar_msg is not None:
+                    if self.iStDoor_msg.contents.get("value") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("value") == StatusCar.CAR_READY_TO_MOVE and self.isGoUp:
+                        self.change_state(STATE.MOVE_UP)
+                        continue
+                    elif self.iStDoor_msg.contents.get("value") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("value") == StatusCar.CAR_READY_TO_MOVE and self.isGoDown:
+                        self.change_state(STATE.MOVE_DOWN)
+                        continue
 
             if self.state == STATE.MOVE_UP:
                 self.isGoUp = True
-                self.send_oCmdCar(MsgCar(CommandCar.CAR_UP, self.curFloor, self.destFloor, True))
+                self.send_oCmdCar(MsgCar("oCmdCar", CommandCar.CAR_UP, self.curFloor, self.destFloor, True))
                 self.change_state(STATE.MOVING_UP)
                 continue
 
             if self.state == STATE.MOVE_DOWN:
                 self.isGoDown = True
-                self.send_oCmdCar(MsgCar(CommandCar.CAR_DOWN, self.curFloor, self.destFloor, True))
+                self.send_oCmdCar(MsgCar("oCmdCar", CommandCar.CAR_DOWN, self.curFloor, self.destFloor, True))
                 self.change_state(STATE.MOVING_DOWN)
                 continue
 
@@ -168,7 +167,7 @@ class ElevatorController(ElevatorComponent):
                     self.receive_iStDoor()
                 if self.iStCar.poll():
                     self.receive_iStCar()
-                if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED:  # and not self.isGoUp and not self.isGoDown:
+                if self.iStDoor_msg.contents.get("value") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("value") == StatusCar.CAR_STOPPED:  # and not self.isGoUp and not self.isGoDown:
                     self.change_state(STATE.STOP)
                     continue
 
@@ -177,7 +176,7 @@ class ElevatorController(ElevatorComponent):
                     self.receive_iStDoor()
                 if self.iStCar.poll():
                     self.receive_iStCar()
-                if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED:  # and not self.isGoUp and not self.isGoDown:
+                if self.iStDoor_msg.contents.get("value") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("value") == StatusCar.CAR_STOPPED:  # and not self.isGoUp and not self.isGoDown:
                     self.change_state(STATE.STOP)
                     continue
 
@@ -186,8 +185,8 @@ class ElevatorController(ElevatorComponent):
                 self.isGoDown = False
                 self.curFloor = self.destFloor
                 # self.send_oCmdCar(MsgCar(CommandCar.CAR_STOP, self.curFloor, self.destFloor, True))
-                self.send_oCmdCar(MsgDoor(CommandDoor.DOOR_CAR_OPEN, self.curFloor, True))
-                self.send_oCmdFloor(self.destFloor, MsgDoor(CommandDoor.DOOR_FLOOR_X_OPEN, self.destFloor, True))
+                self.send_oCmdCar(MsgDoor("oCmdCar", CommandDoor.DOOR_CAR_OPEN, self.curFloor, True))
+                self.send_oCmdFloor(self.destFloor, MsgDoor("oCmdFloor", CommandDoor.DOOR_FLOOR_X_OPEN, self.destFloor, True))
                 self.change_state(STATE.WAIT_FOR_CAR_OPEN)
                 continue
 
@@ -196,7 +195,7 @@ class ElevatorController(ElevatorComponent):
                     self.receive_iStDoor()
                 if self.iStCar.poll():
                     self.receive_iStCar()
-                    if self.iStCar_msg.contents.get("content") == StatusCar.CAR_OPENING:  # and self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_OPENED:
+                    if self.iStCar_msg.contents.get("value") == StatusCar.CAR_OPENING:  # and self.iStDoor_msg.contents.get("value") == StatusDoor.DOOR_BOTH_OPENED:
                         self.change_state(STATE.WAIT_FOR_CAR_CLOSE)
                         continue
 
@@ -205,12 +204,12 @@ class ElevatorController(ElevatorComponent):
                     self.receive_iStDoor()
                 if self.iStCar.poll():
                     self.receive_iStCar()
-                    if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and (self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED or self.iStCar_msg.contents.get("content") == StatusCar.CAR_READY_TO_MOVE):
+                    if self.iStDoor_msg.contents.get("value") == StatusDoor.DOOR_BOTH_CLOSED and (self.iStCar_msg.contents.get("value") == StatusCar.CAR_STOPPED or self.iStCar_msg.contents.get("value") == StatusCar.CAR_READY_TO_MOVE):
                         self.change_state(STATE.DONE)
                         continue
 
             if self.state == STATE.DONE:
-                self.send_done(MsgElev(True))  # "done" or True
+                self.send_done(MsgElev("done", True))  # "done" or True
                 self.reset = True
                 self.change_state(STATE.IDLE)
                 continue

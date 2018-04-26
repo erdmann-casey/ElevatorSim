@@ -30,7 +30,7 @@ class FloorDoor(ElevatorComponent):
         # print("FLOOR {} OPENING DOOR...").format(self.id)
         time.sleep(self.motion_time)
         self.state = STATE.OPENED
-        msg = MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
+        msg = MsgDoor("oStatus", StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
         self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", msg.contents)
         self.out.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
@@ -39,7 +39,7 @@ class FloorDoor(ElevatorComponent):
         # print("FLOOR {} CLOSING DOOR...").format(self.id)
         time.sleep(self.motion_time)
         self.state = STATE.CLOSED
-        msg = MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
+        msg = MsgDoor("oStatus", StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
         self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", msg.contents)
         self.out.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
@@ -48,7 +48,7 @@ class FloorDoor(ElevatorComponent):
         if self.input.poll():
             msg = self.input.recv()
             self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_" + str(self.id), "R", msg.contents)
-            self.job = msg.contents.get("content")
+            self.job = msg.contents.get("value")
             return True
         else:
             return False
@@ -111,7 +111,7 @@ class Floor(ElevatorComponent):
 
     def send_request(self):
         # msg = MsgFloor(CommandFloor.FLOOR_REQ, self.door.id)
-        msg = MsgReq(self.door.id)
+        msg = MsgReq("oReq", self.door.id)
         self.oReq.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.door.id), "RequestProc", "S", msg.contents)
 
