@@ -76,7 +76,7 @@ class RequestProcessor(ElevatorComponent):
             self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "RequestProc", "R", self.in_msg[id].contents)
 
     def receive_input_all(self):
-        for num in range(5):
+        for num in range(6):
             if self.poll_input(num):
                 self.receive_input(num)
             else:

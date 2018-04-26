@@ -192,18 +192,20 @@ class ElevatorController(ElevatorComponent):
                 continue
 
             if self.state == STATE.WAIT_FOR_CAR_OPEN:
-                if self.iStDoor.poll() and self.iStCar.poll():
+                if self.iStDoor.poll():
                     self.receive_iStDoor()
+                if self.iStCar.poll():
                     self.receive_iStCar()
-                    if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_OPENED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_OPENING:
+                    if self.iStCar_msg.contents.get("content") == StatusCar.CAR_OPENING:  # and self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_OPENED:
                         self.change_state(STATE.WAIT_FOR_CAR_CLOSE)
                         continue
 
             if self.state == STATE.WAIT_FOR_CAR_CLOSE:
-                if self.iStDoor.poll() and self.iStCar.poll():
+                if self.iStDoor.poll():
                     self.receive_iStDoor()
+                if self.iStCar.poll():
                     self.receive_iStCar()
-                    if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED:
+                    if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and (self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED or self.iStCar_msg.contents.get("content") == StatusCar.CAR_READY_TO_MOVE):
                         self.change_state(STATE.DONE)
                         continue
 

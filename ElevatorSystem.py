@@ -37,7 +37,7 @@ class ElevatorSystem(object):
 
 
         # setup pipes, output->input
-        self.elevController.done, self.requestProc.input = Pipe()
+        self.elevController.done, self.requestProc.next = Pipe()
         """self.elevController.oCmdCar, self.elevCar.iCmd = Pipe()"""
         # Setup Floor pipes separately, skipping self.elevController.oCmdFloor...
         self.elevController.out, self.doorStatusProc.input = Pipe()

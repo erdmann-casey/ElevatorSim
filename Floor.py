@@ -14,8 +14,8 @@ class STATE(Enum):
 
 class FloorDoor(ElevatorComponent):
 
-    processing_time = 1.0  # double, set arbitrarily
-    motion_time = 2.0      # double, set arbitrarily
+    processing_time = 5.0  # double, set arbitrarily
+    motion_time = 3.0      # double, set arbitrarily
 
     def __init__(self, floor_id, iCmd, oStatus):
         super().__init__()
@@ -28,7 +28,6 @@ class FloorDoor(ElevatorComponent):
 
     def open_door(self):
         # print("FLOOR {} OPENING DOOR...").format(self.id)
-        time.sleep(self.processing_time)
         time.sleep(self.motion_time)
         self.state = STATE.OPENED
         msg = MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
@@ -37,7 +36,6 @@ class FloorDoor(ElevatorComponent):
 
     def close_door(self):
         # print("FLOOR {} CLOSING DOOR...").format(self.id)
-        time.sleep(self.processing_time)
         time.sleep(self.motion_time)
         self.state = STATE.CLOSED
         msg = MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
@@ -79,6 +77,10 @@ class FloorDoor(ElevatorComponent):
                     else:
                         self.close_door()
                     """
+            elif self.state == STATE.OPENED:
+                time.sleep(self.processing_time)
+                self.close_door()
+                continue
 
     def main(self):
         self.state_processor()
