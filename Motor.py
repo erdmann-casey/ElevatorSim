@@ -36,9 +36,14 @@ class Motor(ElevatorComponent):
                 # Generate IN log
                 if(self.IN):
                     self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Motor","R",self.IN.contents)
-                    self.state = STATE.BUSY
-                    # Generate Status log
-                    self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
+
+                    if(self.IN.contents['content'] == StatusMotor.MOTOR_MOVING):
+                        self.state = STATE.BUSY
+                        # Generate Status log
+                        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
+                    elif(self.IN.contents['content'] == StatusMotor.MOTOR_REACHED):
+                        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
+
 
                 
             elif self.state == STATE.BUSY:

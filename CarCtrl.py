@@ -245,16 +245,22 @@ class CarCtrl(ElevatorComponent):
                 if(self.IN):
                     if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
                         self.state = STATE.WAIT_TO_MOVE
+                        self.oMotor = MsgMotor(StatusMotor.MOTOR_MOVING)
                     # in ? MsgCar && cmdCar == UP && statusDoor == CLOSED && operating == true && motor_running == false
                         # Above Met: MoveTo STATE.WAIT_TO_MOVE
                     elif(self.IN.contents['content'] == CommandCar.CAR_UP and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
                         self.state = STATE.WAIT_TO_MOVE
+                        self.oMotor = MsgMotor(StatusMotor.MOTOR_MOVING)
                     # iMotor ? MsgMotor pos==dest
                         # Above Met: MoveTo STATE.REACHED
-                    elif(self.iMotor and self.curFloor == self.destFloor):
+                    elif(self.curFloor == self.destFloor):
                         self.state = STATE.REACHED
+                        self.oMotor = MsgMotor(StatusMotor.MOTOR_REACHED)
+                    
                     
             elif self.state == STATE.REACHED:
+                # Set MotorStatus to none to prevent log spam
+                self.oMotor = None
                 # MsgCar -> oSt
                 self.oSt = MsgCar(StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
 
