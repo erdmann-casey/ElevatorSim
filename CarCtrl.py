@@ -81,6 +81,7 @@ class CarCtrl(ElevatorComponent):
         if(isinstance(self.IN, MsgCar)):
             self.curFloor = self.IN.contents['pos']
             self.destFloor = self.IN.contents['dest']
+
         # Generate IN Log 
         self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Car Ctrl","R", self.IN.contents)
         
@@ -243,7 +244,10 @@ class CarCtrl(ElevatorComponent):
                     # Above Met: MoveTo STATE.WAIT_TO_MOVE
 
                 if(self.IN):
-                    if(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
+                    if(self.curFloor == self.destFloor):
+                        self.state = STATE.REACHED
+                        self.oMotor = MsgMotor(StatusMotor.MOTOR_REACHED)
+                    elif(self.IN.contents['content'] == CommandCar.CAR_DOWN and self.doorStatus == StatusDoor.DOOR_CAR_CLOSED and self.operating and self.motorStatus == StatusMotor.MOTOR_REACHED):
                         self.state = STATE.WAIT_TO_MOVE
                         self.oMotor = MsgMotor(StatusMotor.MOTOR_MOVING)
                     # in ? MsgCar && cmdCar == UP && statusDoor == CLOSED && operating == true && motor_running == false
@@ -253,9 +257,6 @@ class CarCtrl(ElevatorComponent):
                         self.oMotor = MsgMotor(StatusMotor.MOTOR_MOVING)
                     # iMotor ? MsgMotor pos==dest
                         # Above Met: MoveTo STATE.REACHED
-                    elif(self.curFloor == self.destFloor):
-                        self.state = STATE.REACHED
-                        self.oMotor = MsgMotor(StatusMotor.MOTOR_REACHED)
                     
                     
             elif self.state == STATE.REACHED:

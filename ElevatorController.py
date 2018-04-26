@@ -155,7 +155,6 @@ class ElevatorController(ElevatorComponent):
                 self.isGoUp = True
                 self.send_oCmdCar(MsgCar(CommandCar.CAR_UP, self.curFloor, self.destFloor, True))
                 self.change_state(STATE.MOVING_UP)
-                print("ELEVATOR CONTROLLER change state to MOVING UP")
                 continue
 
             if self.state == STATE.MOVE_DOWN:
@@ -165,20 +164,22 @@ class ElevatorController(ElevatorComponent):
                 continue
 
             if self.state == STATE.MOVING_UP:
-                if self.iStDoor.poll() and self.iStCar.poll():
+                if self.iStDoor.poll():
                     self.receive_iStDoor()
+                if self.iStCar.poll():
                     self.receive_iStCar()
-                    if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED and not self.isGoUp and not self.isGoDown:
-                        self.change_state(STATE.STOP)
-                        continue
+                if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED:  # and not self.isGoUp and not self.isGoDown:
+                    self.change_state(STATE.STOP)
+                    continue
 
             if self.state == STATE.MOVING_DOWN:
-                if self.iStDoor.poll() and self.iStCar.poll():
+                if self.iStDoor.poll():
                     self.receive_iStDoor()
+                if self.iStCar.poll():
                     self.receive_iStCar()
-                    if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED and not self.isGoUp and not self.isGoDown:
-                        self.change_state(STATE.STOP)
-                        continue
+                if self.iStDoor_msg.contents.get("content") == StatusDoor.DOOR_BOTH_CLOSED and self.iStCar_msg.contents.get("content") == StatusCar.CAR_STOPPED:  # and not self.isGoUp and not self.isGoDown:
+                    self.change_state(STATE.STOP)
+                    continue
 
             if self.state == STATE.STOP:
                 self.isGoUp = False
