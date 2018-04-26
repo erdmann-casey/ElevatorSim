@@ -212,7 +212,8 @@ class CarCtrl(ElevatorComponent):
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", self.oMotor.contents)
 
                 # MsgCar -> oSt
-                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor + 1, self.destFloor, False)
+                self.curFloor += 1
+                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
 
                 # Generate oSt Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
@@ -228,7 +229,8 @@ class CarCtrl(ElevatorComponent):
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", self.oMotor.contents)
          
                 # MsgCar -> oSt
-                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor - 1, self.destFloor, False)
+                self.curFloor -= 1
+                self.oSt = MsgCar(StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
 
                 # Generate oSt Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
