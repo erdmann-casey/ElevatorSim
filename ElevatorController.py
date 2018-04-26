@@ -185,7 +185,8 @@ class ElevatorController(ElevatorComponent):
                 self.isGoUp = False
                 self.isGoDown = False
                 self.curFloor = self.destFloor
-                self.send_oCmdCar(MsgCar(CommandCar.CAR_STOP, self.curFloor, self.destFloor, True))
+                # self.send_oCmdCar(MsgCar(CommandCar.CAR_STOP, self.curFloor, self.destFloor, True))
+                self.send_oCmdCar(MsgDoor(CommandDoor.DOOR_CAR_OPEN, self.curFloor, True))
                 self.send_oCmdFloor(self.destFloor, MsgDoor(CommandDoor.DOOR_FLOOR_X_OPEN, self.destFloor, True))
                 self.change_state(STATE.WAIT_FOR_CAR_OPEN)
                 continue
