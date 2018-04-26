@@ -31,6 +31,7 @@ class FloorDoor(ElevatorComponent):
         time.sleep(self.motion_time)
         self.state = STATE.OPENED
         msg = MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", msg.contents)
         self.out.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
 
@@ -39,6 +40,7 @@ class FloorDoor(ElevatorComponent):
         time.sleep(self.motion_time)
         self.state = STATE.CLOSED
         msg = MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", msg.contents)
         self.out.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
 
