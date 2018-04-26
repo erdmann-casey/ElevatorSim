@@ -104,7 +104,7 @@ class DoorStatusProcessor(ElevatorComponent):
 
     def receive_input(self):
         self.input_msg = self.input.recv()
-        self.curFloor = self.input_msg.contents.get("ELEV")
+        self.curFloor = self.input_msg.contents.get("value").get("ELEV")
         self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "DoorStatusProc", "R", self.input_msg.contents)
 
     def send_out(self, msg):

@@ -124,7 +124,7 @@ class RequestProcessor(ElevatorComponent):
 
                 elif self.next.poll():
                     self.receive_next()
-                    if self.next_msg.contents.get("ELEV") is True:
+                    if self.next_msg.contents.get("value").get("ELEV") is True:
                         self.change_state(STATE.SEND_JOB)
                         continue
 

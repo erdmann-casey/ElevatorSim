@@ -78,7 +78,7 @@ class CommandReq(Command):
 class MsgReq(Msg):
     
     def __init__(self, port, dest):
-        self.contents = {"port": port, "REQ": dest}
+        self.contents = {"port": port, "value": {"REQ": dest}}
 
 
 class CommandElev(Command):
@@ -88,7 +88,7 @@ class CommandElev(Command):
 class MsgElev(Msg):
 
     def __init__(self, port, content):
-        self.contents = {"port": port, "ELEV": content}
+        self.contents = {"port": port, "value": {"ELEV": content}}
 
 
 class CommandFloor(Command):

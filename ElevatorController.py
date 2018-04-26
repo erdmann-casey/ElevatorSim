@@ -54,7 +54,7 @@ class ElevatorController(ElevatorComponent):
     def receive_iReq(self):
         if self.iReq.poll():
             self.iReq_msg = self.iReq.recv()
-            self.destFloor = self.iReq_msg.contents.get("REQ")
+            self.destFloor = self.iReq_msg.contents.get("value").get("REQ")
             self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "R", self.iReq_msg.contents)
             if self.destFloor > self.curFloor:
                 self.isGoUp = True
