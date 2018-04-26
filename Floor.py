@@ -24,22 +24,22 @@ class FloorDoor(ElevatorComponent):
         self.job = None              # entity
         self.input = iCmd
         self.out = oStatus
-        # self.state = STATE.CLOSED
+        self.state = STATE.CLOSED
 
     def open_door(self):
         # print("FLOOR {} OPENING DOOR...").format(self.id)
-        # time.sleep(self.processing_time)
-        # time.sleep(self.motion_time)
-        # self.state = STATE.OPENED
+        time.sleep(self.processing_time)
+        time.sleep(self.motion_time)
+        self.state = STATE.OPENED
         msg = MsgDoor(StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
         self.out.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
 
     def close_door(self):
         # print("FLOOR {} CLOSING DOOR...").format(self.id)
-        # time.sleep(self.processing_time)
-        # time.sleep(self.motion_time)
-        # self.state = STATE.CLOSED
+        time.sleep(self.processing_time)
+        time.sleep(self.motion_time)
+        self.state = STATE.CLOSED
         msg = MsgDoor(StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
         self.out.send(msg)
         self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)

@@ -114,27 +114,23 @@ class DoorStatusProcessor(ElevatorComponent):
     def state_processor(self):
         while True:
             if self.state == STATE.BUSY:
-                if self.poll_iStFloor(self.curFloor) and self.iStCar.poll():
+                if self.iStCar.poll():
                     self.receive_iStCar()
-                    self.receive_iStFloor(self.curFloor)
-                    print("Received Door States...")
+                self.receive_iStFloor_all()
 
-                    if self.doors[self.curFloor] == StatusDoor.DOOR_FLOOR_CLOSED and self.doors[0] == StatusDoor.DOOR_CAR_CLOSED:
-                        print("----Door States synchronized!!----")
-                        self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_CLOSED, self.curFloor, False))
-                        self.curFloor = None
-                        self.change_state(STATE.DONE)
-                        continue
+                if self.doors.get(self.curFloor) == StatusDoor.DOOR_FLOOR_CLOSED and self.doors.get(0) == StatusDoor.DOOR_CAR_CLOSED:
+                    print("----Door States synchronized!!----")
+                    self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_CLOSED, self.curFloor, False))
+                    self.curFloor = None
+                    self.change_state(STATE.DONE)
+                    continue
 
-                    elif self.doors[self.curFloor] == StatusDoor.DOOR_FLOOR_OPENED and self.doors[0] == StatusDoor.DOOR_CAR_OPENED:
-                        print("----Door States synchronized!!----")
-                        self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_OPENED, self.curFloor, False))
-                        self.curFloor = None
-                        self.change_state(STATE.DONE)
-                        continue
-                    else:
-                        print("----Door States NOT synchronized!!----")
-                        continue
+                elif self.doors.get(self.curFloor) == StatusDoor.DOOR_FLOOR_OPENED and self.doors.get(0) == StatusDoor.DOOR_CAR_OPENED:
+                    print("----Door States synchronized!!----")
+                    self.send_out(MsgDoor(StatusDoor.DOOR_BOTH_OPENED, self.curFloor, False))
+                    self.curFloor = None
+                    self.change_state(STATE.DONE)
+                    continue
                 else:
                     continue
 
