@@ -55,7 +55,7 @@ class ElevatorController(ElevatorComponent):
         if self.iReq.poll():
             self.iReq_msg = self.iReq.recv()
             self.destFloor = self.iReq_msg.contents.get("value").get("REQ")
-            self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "R", self.iReq_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "R", "iReq", self.iReq_msg)
             if self.destFloor > self.curFloor:
                 self.isGoUp = True
             elif self.destFloor < self.curFloor:
@@ -68,7 +68,7 @@ class ElevatorController(ElevatorComponent):
         if self.iStCar.poll():
             self.iStCar_msg = self.iStCar.recv()
             self.statusCar = self.iStCar_msg.contents.get("value")
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "ElevCtrl", "R", self.iStCar_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "ElevCtrl", "R", "iStCar", self.iStCar_msg)
             return True
         else:
             return False
@@ -77,43 +77,43 @@ class ElevatorController(ElevatorComponent):
         if self.iStDoor.poll():
             self.iStDoor_msg = self.iStDoor.recv()
             self.statusDoor = self.iStDoor_msg.contents.get("value")
-            self.write_log(self.get_sim_time(), self.get_real_time(), "DoorStatusProc", "ElevCtrl", "R", self.iStDoor_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "DoorStatusProc", "ElevCtrl", "R", "iStDoor", self.iStDoor_msg)
             return True
         else:
             return False
 
     def send_oCmdCar(self, msg):
         self.oCmdCar.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "ElevCar", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "ElevCar", "S", "oCmdCar", msg)
 
     def send_oCmdFloor(self, id, msg):
         if id is 1:
             self.oCmdFloor1.send(msg)
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_1", "S", msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_1", "S", "oCmdFloor", msg)
 
         elif id is 2:
             self.oCmdFloor2.send(msg)
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_2", "S", msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_2", "S", "oCmdFloor", msg)
 
         elif id is 3:
             self.oCmdFloor3.send(msg)
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_3", "S", msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_3", "S", "oCmdFloor", msg)
 
         elif id is 4:
             self.oCmdFloor4.send(msg)
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_4", "S", msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_4", "S", "oCmdFloor", msg)
 
         elif id is 5:
             self.oCmdFloor5.send(msg)
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_5", "S", msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_5", "S", "oCmdFloor", msg)
 
     def send_out(self, msg):
         self.out.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "DoorStatusProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "DoorStatusProc", "S", "oCmdFloor", msg)
 
     def send_done(self, msg):
         self.done.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "S", "oCmdFloor", msg)
 
     def state_processor(self):
         while True:

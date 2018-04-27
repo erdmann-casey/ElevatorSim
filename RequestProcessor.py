@@ -53,27 +53,27 @@ class RequestProcessor(ElevatorComponent):
         if id == 0:
             self.in_msg[id] = self.input_car.recv()
             self.q.put(self.in_msg[id])
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "RequestProc", "R", self.in_msg[id].contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCar", "RequestProc", "R", "in", self.in_msg[id])
         if id == 1:
             self.in_msg[id] = self.input_floor1.recv()
             self.q.put(self.in_msg[id])
-            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "RequestProc", "R", self.in_msg[id].contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_1", "RequestProc", "R", "in", self.in_msg[id])
         if id == 2:
             self.in_msg[id] = self.input_floor2.recv()
             self.q.put(self.in_msg[id])
-            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "RequestProc", "R", self.in_msg[id].contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_2", "RequestProc", "R", "in", self.in_msg[id])
         if id == 3:
             self.in_msg[id] = self.input_floor3.recv()
             self.q.put(self.in_msg[id])
-            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "RequestProc", "R", self.in_msg[id].contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_3", "RequestProc", "R", "in", self.in_msg[id])
         if id == 4:
             self.in_msg[id] = self.input_floor4.recv()
             self.q.put(self.in_msg[id])
-            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "RequestProc", "R", self.in_msg[id].contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_4", "RequestProc", "R", "in", self.in_msg[id])
         if id == 5:
             self.in_msg[id] = self.input_floor5.recv()
             self.q.put(self.in_msg[id])
-            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "RequestProc", "R", self.in_msg[id].contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_5", "RequestProc", "R", "in", self.in_msg[id])
 
     def receive_input_all(self):
         for num in range(6):
@@ -85,14 +85,14 @@ class RequestProcessor(ElevatorComponent):
     def receive_next(self):
         if self.next.poll():
             self.next_msg = self.next.recv()
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "R", self.next_msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "RequestProc", "R", "next", self.next_msg)
             return True
         else:
             return False
 
     def send_out(self, msg):
         self.out.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "RequestProc", "ElevCtrl", "S", "out", msg)
 
     def state_processor(self):
         while True:

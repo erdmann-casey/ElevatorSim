@@ -31,23 +31,23 @@ class FloorDoor(ElevatorComponent):
         time.sleep(self.motion_time)
         self.state = STATE.OPENED
         msg = MsgDoor("oStatus", StatusDoor().DOOR_FLOOR_OPENED, self.id, False)
-        self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", "", msg)
         self.out.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", "oStatus", msg)
 
     def close_door(self):
         # print("FLOOR {} CLOSING DOOR...").format(self.id)
         time.sleep(self.motion_time)
         self.state = STATE.CLOSED
         msg = MsgDoor("oStatus", StatusDoor().DOOR_FLOOR_CLOSED, self.id, False)
-        self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Floor_" + str(self.id), "", "C", "", msg)
         self.out.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.id), "DoorStatusProc", "S", "oStatus", msg)
 
     def receive_in(self):
         if self.input.poll():
             msg = self.input.recv()
-            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_" + str(self.id), "R", msg.contents)
+            self.write_log(self.get_sim_time(), self.get_real_time(), "ElevCtrl", "Floor_" + str(self.id), "R", "iCmd", msg)
             self.job = msg.contents.get("value")
             return True
         else:
@@ -113,7 +113,7 @@ class Floor(ElevatorComponent):
         # msg = MsgFloor(CommandFloor.FLOOR_REQ, self.door.id)
         msg = MsgReq("oReq", self.door.id)
         self.oReq.send(msg)
-        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.door.id), "RequestProc", "S", msg.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(), "Floor_" + str(self.door.id), "RequestProc", "S", "oReq", msg)
 
 
 if __name__ == '__main__':

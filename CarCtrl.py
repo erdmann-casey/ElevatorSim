@@ -62,7 +62,7 @@ class CarCtrl(ElevatorComponent):
         self.iMotor = iMotor
         
         # Generate iMotor Log 
-        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","Car Ctrl","R", self.iMotor.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","Car Ctrl","R", "iMotor", self.iMotor)
         
         self.motorStatus = self.iMotor.contents["value"]
 
@@ -71,7 +71,7 @@ class CarCtrl(ElevatorComponent):
         self.iDoor = iDoor 
  
         # Generate iDoor Log 
-        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Car Ctrl","R", self.iDoor.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Car Door","Car Ctrl","R", "iDoor", self.iDoor)
         
         self.doorStatus = self.iDoor.contents["value"]
 
@@ -83,7 +83,7 @@ class CarCtrl(ElevatorComponent):
             self.destFloor = self.IN.contents['dest']
 
         # Generate IN Log 
-        self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Car Ctrl","R", self.IN.contents)
+        self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Car Ctrl","R", "in", self.IN)
         
         # in ? msgDoor && cmdDoor == OPEN 
             # Above Met: MoveTo STATE.OPENING_DOOR
@@ -117,18 +117,18 @@ class CarCtrl(ElevatorComponent):
                 self.oDoor = MsgDoor("oDoor", StatusDoor.DOOR_CAR_OPENED, self.curFloor, False)
 
                 # Generate Opening Status Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", "oDoor", self.oDoor)
 
                 self.oDoor = MsgDoor("oDoor", CommandDoor.DOOR_CAR_OPEN, self.curFloor, False)
                 # Generate oDoor Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", "oDoor", self.oDoor)
                 self.door.setIN(self.oDoor)
 
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar("oSt", StatusCar.CAR_OPENING, self.curFloor, self.destFloor, False)
 
                 # Generate oSt Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", "oSt", self.oSt)
                 self.car.setoStCarMsg(self.oSt)
                 # MoveTo STATE.CONFIRM_OPEN
                 self.state = STATE.CONFIRM_OPEN
@@ -140,7 +140,7 @@ class CarCtrl(ElevatorComponent):
                     # Above Met: MoveTo STATE.CLOSING
                 if(self.iDoor):
                     if(self.iDoor.contents["value"] == StatusDoor.DOOR_CAR_OPENED):
-                        self.write_log(self.get_sim_time(), self.get_real_time(), "Car Ctrl", "", "C", self.iDoor.contents)
+                        self.write_log(self.get_sim_time(), self.get_real_time(), "Car Ctrl", "", "C", "iDoor", self.iDoor)
                         self.state = STATE.CLOSING
                     
                     # Generate Opened Status Log
@@ -149,7 +149,7 @@ class CarCtrl(ElevatorComponent):
                 # MoveTo STATE.PREP_TO_CLOSE
 
                 # Generate Closing Status Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", STATE.CLOSING)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", "", self.iDoor)
 
                 self.state = STATE.PREP_TO_CLOSE
 
@@ -157,17 +157,17 @@ class CarCtrl(ElevatorComponent):
                 # Send message MsgDoor -> oDoor
                 self.oDoor = MsgDoor("oDoor", StatusDoor.DOOR_CAR_CLOSED, self.curFloor, False)
                 # Generate Closing Status Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", self.oDoor.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", "oDoor", self.oDoor)
 
                 # Generate oDoor Status Log 
                 self.oDoor = MsgDoor("oDoor", CommandDoor.DOOR_CAR_CLOSE, self.curFloor, False)
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", self.oDoor.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", "oDoor", self.oDoor)
                 self.door.setIN(self.oDoor)
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar("oSt", StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
                 
                 # Generate oSt Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", "oSt", self.oSt)
                 self.car.setoStCarMsg(self.oSt)
                 # MoveTo STATE.CONFIRM_CLOSE
                 self.state = STATE.CONFIRM_CLOSE
@@ -179,7 +179,7 @@ class CarCtrl(ElevatorComponent):
                     # Above Met: MoveTo STATE.PREP_TO_MOVE
                 if(self.iDoor):
                     if(self.iDoor.contents["value"] == StatusDoor.DOOR_CAR_CLOSED):
-                        self.write_log(self.get_sim_time(), self.get_real_time(), "Car Ctrl", "", "C", self.iDoor.contents)
+                        self.write_log(self.get_sim_time(), self.get_real_time(), "Car Ctrl", "", "C", "", self.iDoor)
                         self.state = STATE.PREP_TO_MOVE
                     
                     # Generate Closing Status Log
@@ -189,7 +189,7 @@ class CarCtrl(ElevatorComponent):
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar("oSt", StatusCar.CAR_READY_TO_MOVE, self.curFloor, self.destFloor, False)
                 # Generate oSt Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", "oSt", self.oSt)
                 self.car.setoStCarMsg(self.oSt)
                  # MoveTo STATE.WAIT_TO_MOVE
                 self.state = STATE.WAIT_TO_MOVE
@@ -210,14 +210,14 @@ class CarCtrl(ElevatorComponent):
                 self.oMotor = MsgMotor("oMotor", CommandMotor.MOTOR_FORWARD)
 
                 # Generate oMotor Log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", self.oMotor.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", "oMotor", self.oMotor)
 
                 # MsgCar -> oSt
                 self.curFloor += 1
                 self.oSt = MsgCar("oSt", StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
 
                 # Generate oSt Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", "oSt", self.oSt)
                 self.car.setoStCarMsg(self.oSt)
                 # MoveTo STATE.MOVING
                 self.state = STATE.MOVING
@@ -227,14 +227,14 @@ class CarCtrl(ElevatorComponent):
                 self.oMotor = MsgMotor("oMotor", CommandMotor.MOTOR_BACKWARD)
                 
                 # Generate oMotor Log    
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", self.oMotor.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Motor","S", "oMotor", self.oMotor)
          
                 # MsgCar -> oSt
                 self.curFloor -= 1
                 self.oSt = MsgCar("oSt", StatusCar.CAR_MOVING, self.curFloor, self.destFloor, False)
 
                 # Generate oSt Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", "oSt", self.oSt)
                 self.car.setoStCarMsg(self.oSt)
                 # MoveTo STATE.MOVING
                 self.state = STATE.MOVING
@@ -266,7 +266,7 @@ class CarCtrl(ElevatorComponent):
                 self.oSt = MsgCar("oSt", StatusCar.CAR_STOPPED, self.curFloor, self.destFloor, False)
 
                 # Generate oSt Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", self.oSt.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Elevator Car","S", "oSt", self.oSt)
                 self.car.setoStCarMsg(self.oSt)
                 # MoveTo STATE.WAIT_TO_OPEN
                 self.state = STATE.WAIT_TO_OPEN

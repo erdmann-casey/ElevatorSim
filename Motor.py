@@ -35,14 +35,14 @@ class Motor(ElevatorComponent):
                 self.IN = self.ctrl.oMotor
                 # Generate IN log
                 if(self.IN):
-                    self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Motor","R",self.IN.contents)
+                    self.write_log(self.get_sim_time(), self.get_real_time(),"Elevator Ctrl","Motor","R","in",self.IN)
 
                     if(self.IN.contents["value"] == StatusMotor.MOTOR_MOVING):
                         self.state = STATE.BUSY
                         # Generate Status log
-                        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
+                        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C","",self.IN)
                     elif(self.IN.contents["value"] == StatusMotor.MOTOR_REACHED):
-                        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C",self.IN.contents)
+                        self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","","C","",self.IN)
 
 
                 
@@ -53,7 +53,7 @@ class Motor(ElevatorComponent):
                 self.ctrl.setiMotor(self.OUT)
 
                 # Generate OUT log
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","Elevator Ctrl","S",self.OUT.contents)
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Motor","Elevator Ctrl","S","out",self.OUT)
 
                 # MoveTo STATE.PASSIVE
                 self.state = STATE.PASSIVE
