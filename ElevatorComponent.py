@@ -46,6 +46,7 @@ class ElevatorComponent(Process):
                 log_str = log_str.replace("X", str(msg.contents.get("id")))
             else:
                 log_str += '{"port":"'+port+'", "value": "'+msg.contents.get("value")+'"}'
+                log_str = log_str.replace("X", str(msg.contents.get("id")))
 
         elif type(msg) is MsgElev:
             if action == "C":
@@ -59,6 +60,8 @@ class ElevatorComponent(Process):
                 log_str = log_str.replace("X", str(msg.contents.get("id")))
             else:
                 log_str += '{"port":"' + port + '", "value": "' + msg.contents.get("value") + '"}'
+                log_str = log_str.replace("X", str(msg.contents.get("id")))
+               
 
         elif type(msg) is MsgMotor:
             if action == "C":
