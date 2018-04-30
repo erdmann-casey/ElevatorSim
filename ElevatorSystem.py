@@ -9,6 +9,7 @@ from Motor import Motor
 from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
 from DoorStatusProcessor import DoorStatusProcessor
+from AttackCloseCarDoor import AttackCloseCarDoor
 from Floor import Floor
 
 class ElevatorSystem(object):
@@ -24,7 +25,7 @@ class ElevatorSystem(object):
         
         # Special Instation for Elevator Car to handle dependencies for inner communication
         self.elevCar = ElevatorCar(None)
-        self.elevCarCtrl = CarCtrl(None, None, None)
+        self.elevCarCtrl = CarCtrl(None, None, None, None)
         self.elevCarDoor = CarDoor(self.elevCarCtrl, self.elevCar)
         self.elevCarBtn = CarBtn(self.elevCar)
         self.elevCarMotor = Motor(self.elevCarCtrl)
@@ -34,6 +35,11 @@ class ElevatorSystem(object):
         self.elevCarCtrl.car = self.elevCar
         self.elevCarCtrl.door = self.elevCarDoor
         self.elevCarCtrl.motor = self.elevCarMotor
+
+
+        # Attack One: Leave Car Door closed when destination is reached
+        #self.attack_one = AttackCloseCarDoor(self.elevCarDoor)
+        #self.elevCarCtrl.attack = self.attack_one
 
 
         # setup pipes, output->input

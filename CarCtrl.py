@@ -26,7 +26,7 @@ class STATE(Enum):
 
 class CarCtrl(ElevatorComponent):
     
-    def __init__(self, CarDoor, Motor, ElevatorCar):
+    def __init__(self, CarDoor, Motor, ElevatorCar, Attack):
         super().__init__()
         # input
         self.iDoor = None    # Received from Car Door
@@ -55,6 +55,8 @@ class CarCtrl(ElevatorComponent):
         self.operating = False
 
         self.motorStatus = StatusMotor.MOTOR_REACHED
+
+        self.attack = Attack
 
         
 
@@ -103,8 +105,14 @@ class CarCtrl(ElevatorComponent):
         thread_Motor = Thread(target = self.motor.state_processor, args = ())
         thread_Motor.start()
         
-        thread_CarDoor = Thread(target = self.door.state_processor, args = ())
-        thread_CarDoor.start()
+
+
+        if(self.attack):
+            thread_AttackerCloseDoor = Thread(target = self.attack.state_processor, args = ())
+            thread_AttackerCloseDoor.start()
+        else:
+            thread_CarDoor = Thread(target = self.door.state_processor, args = ())
+            thread_CarDoor.start()
 
         while True:
             
@@ -113,16 +121,22 @@ class CarCtrl(ElevatorComponent):
                 self.operating = False
             
             elif self.state == STATE.OPENING_DOOR:
+
+
+                self.oDoor = MsgDoor("oDoor", CommandDoor.DOOR_CAR_OPEN, self.curFloor, False)
+                # Generate oDoor Log 
+                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", "oDoor", self.oDoor)
+                if(self.attack):
+                    self.attack.setIN(self.oDoor)
+                else:
+                    self.door.setIN(self.oDoor)
+
                 # Send message MsgDoor -> oDoor
                 self.oDoor = MsgDoor("oDoor", StatusDoor.DOOR_CAR_OPENED, self.curFloor, False)
 
                 # Generate Opening Status Log 
                 self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","","C", "oDoor", self.oDoor)
 
-                self.oDoor = MsgDoor("oDoor", CommandDoor.DOOR_CAR_OPEN, self.curFloor, False)
-                # Generate oDoor Log 
-                self.write_log(self.get_sim_time(), self.get_real_time(),"Car Ctrl","Car Door","S", "oDoor", self.oDoor)
-                self.door.setIN(self.oDoor)
 
                 # Send message MsgCar -> oSt
                 self.oSt = MsgCar("oSt", StatusCar.CAR_OPENING, self.curFloor, self.destFloor, False)
@@ -289,5 +303,6 @@ if __name__ == '__main__':
     door = None
     motor = None
     car = None
-    ctrl = CarCtrl(door, motor, car)
+    attack = None
+    ctrl = CarCtrl(door, motor, car, attack)
     ctrl.main()
