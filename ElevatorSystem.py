@@ -10,6 +10,7 @@ from ElevatorController import ElevatorController
 from RequestProcessor import RequestProcessor
 from DoorStatusProcessor import DoorStatusProcessor
 from AttackCloseCarDoor import AttackCloseCarDoor
+from AttackMotorRun import AttackMotorRun
 from Floor import Floor
 
 class ElevatorSystem(object):
@@ -41,6 +42,9 @@ class ElevatorSystem(object):
         #self.attack_one = AttackCloseCarDoor(self.elevCarDoor)
         #self.elevCarCtrl.attack = self.attack_one
 
+        # Attack Two: Set floor request to a nonexistent floor to cause the motor to never stop
+        #self.attack_two = AttackMotorRun()
+        self.attack_two = None
 
         # setup pipes, output->input
         self.elevController.done, self.requestProc.next = Pipe()
@@ -50,7 +54,11 @@ class ElevatorSystem(object):
         self.requestProc.out, self.elevController.iReq = Pipe()
         self.doorStatusProc.out, self.elevController.iStDoor = Pipe()
         
-        self.elevCar.iCmd, self.elevController.oCmdCar = Pipe()
+        if(self.attack_two):
+            self.elevCar.iCmd, self.attack_two.oCmdCar = Pipe()
+            self.attack_two.iCmd, self.elevController.oCmdCar = Pipe()
+        else:
+            self.elevCar.iCmd, self.elevController.oCmdCar = Pipe()
         self.elevCar.oReq, self.requestProc.input_car = Pipe()  # input[0] reserved for ElevCar, [1] = F1, [2] = F2, etc.
         self.elevCar.oStCar, self.elevController.iStCar = Pipe()
         self.elevCar.oStDoor, self.doorStatusProc.iStCar = Pipe()
@@ -99,6 +107,8 @@ class ElevatorSystem(object):
         self.elevController.start()
         self.requestProc.start()
         self.doorStatusProc.start()
+        if(self.attack_two):
+            self.attack_two.start()
         # Floors
         for num in range(6):
             if num is 0:

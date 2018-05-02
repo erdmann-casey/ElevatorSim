@@ -1,6 +1,7 @@
 from ElevatorComponent import ElevatorComponent
 from threading import Thread
 from Messages import *
+from AttackCloseCarDoor import AttackCloseCarDoor
 
 class STATE(Enum):
     """
@@ -106,8 +107,7 @@ class CarCtrl(ElevatorComponent):
         thread_Motor.start()
         
 
-
-        if(self.attack):
+        if(isinstance(self.attack, AttackCloseCarDoor)):
             thread_AttackerCloseDoor = Thread(target = self.attack.state_processor, args = ())
             thread_AttackerCloseDoor.start()
         else:
