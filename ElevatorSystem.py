@@ -11,6 +11,7 @@ from RequestProcessor import RequestProcessor
 from DoorStatusProcessor import DoorStatusProcessor
 from AttackCloseCarDoor import AttackCloseCarDoor
 from AttackMotorRun import AttackMotorRun
+from AttackButtonReq import AttackButtonReq
 from Floor import Floor
 
 class ElevatorSystem(object):
@@ -41,10 +42,15 @@ class ElevatorSystem(object):
         # Attack One: Leave Car Door closed when destination is reached
         #self.attack_one = AttackCloseCarDoor(self.elevCarDoor)
         #self.elevCarCtrl.attack = self.attack_one
+        self.attack_one = None
 
         # Attack Two: Set floor request to a nonexistent floor to cause the motor to never stop
         #self.attack_two = AttackMotorRun()
         self.attack_two = None
+
+        # Attack Three: Force all request from car button to go to a specific floor
+        #self.attack_three = AttackButtonReq()
+        self.attack_three = None
 
         # setup pipes, output->input
         self.elevController.done, self.requestProc.next = Pipe()
@@ -54,12 +60,19 @@ class ElevatorSystem(object):
         self.requestProc.out, self.elevController.iReq = Pipe()
         self.doorStatusProc.out, self.elevController.iStDoor = Pipe()
         
+        # MitM for Attack Two
         if(self.attack_two):
             self.elevCar.iCmd, self.attack_two.oCmdCar = Pipe()
             self.attack_two.iCmd, self.elevController.oCmdCar = Pipe()
         else:
             self.elevCar.iCmd, self.elevController.oCmdCar = Pipe()
-        self.elevCar.oReq, self.requestProc.input_car = Pipe()  # input[0] reserved for ElevCar, [1] = F1, [2] = F2, etc.
+
+        # MitM for Attack Three:
+        if(self.attack_three):
+            self.elevCar.oReq, self.attack_three.IN = Pipe()
+            self.attack_three.oReq, self.requestProc.input_car = Pipe()
+        else:
+            self.elevCar.oReq, self.requestProc.input_car = Pipe()  # input[0] reserved for ElevCar, [1] = F1, [2] = F2, etc.
         self.elevCar.oStCar, self.elevController.iStCar = Pipe()
         self.elevCar.oStDoor, self.doorStatusProc.iStCar = Pipe()
 
@@ -109,6 +122,8 @@ class ElevatorSystem(object):
         self.doorStatusProc.start()
         if(self.attack_two):
             self.attack_two.start()
+        if(self.attack_three):
+            self.attack_three.start()
         # Floors
         for num in range(6):
             if num is 0:
@@ -173,6 +188,51 @@ class ElevatorSystem(object):
                     break
                 else:
                     print("Floor {} does not exist".format(floor_no))
+    def attack_menu(self):
+        while True:
+            print(
+                "\n"
+                "1) Attack One: Keep Car Door Closed\n"
+                "2) Attack Two: Elevator Car Crash/Motor Burnout\n"
+                "3) Attack Three: Force always the same floor from car button\n"
+                "C) Cancel)\n"
+                )
+            user_input = input("Please Select an Attack: ")
+            
+            if user_input == 'c' or user_input == 'C':
+                break
+            else:
+                attack_num = int(user_input)
+                if attack_num == 1:
+                    self.attack_one = AttackCloseCarDoor(self.elevCarDoor)
+                    self.elevCarCtrl.attack = self.attack_one
+                    self.attack_two = None
+                    self.attack_three = None
+                    print("Attack {} is initialized\n".format(attack_num))
+                    break
+                elif attack_num == 2:
+                    self.attack_two = AttackMotorRun()
+                    self.elevCar.iCmd, self.attack_two.oCmdCar = Pipe()
+                    self.attack_two.iCmd, self.elevController.oCmdCar = Pipe()
+
+                    self.attack_one = None
+                    self.attack_three = None
+                    print("Attack {} is initialized\n".format(attack_num))
+                    break
+                elif attack_num == 3:
+                    self.attack_three = AttackButtonReq()
+                    self.elevCar.oReq, self.attack_three.IN = Pipe()
+                    self.attack_three.oReq, self.requestProc.input_car = Pipe()
+
+                    self.attack_one = None
+                    self.attack_two = None
+                    print("Attack {} is initialized\n".format(attack_num))
+                    break
+                else:
+                    print("Attack {} does not exist\n".format(attack_num))
+
+                    
+
 
     def check_all_processes_live(self):
         if not self.elevCar.is_alive():
@@ -201,6 +261,7 @@ class ElevatorSystem(object):
                 "3) Intercept Communications\n"
                 "4) Press Elevator Button\n"
                 "5) Press Floor Button\n"
+                "6) Enable An Attack! (Do this first if you want to test attacks)\n"
                 "Q) Quit\n"
             )
 
@@ -221,6 +282,9 @@ class ElevatorSystem(object):
 
             elif user_input == '5':
                 self.floor_menu()
+            
+            elif user_input == '6':
+                self.attack_menu()
 
             elif user_input == 'q' or user_input == 'Q':
                 print("Exiting...\n")
