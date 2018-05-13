@@ -39,9 +39,7 @@ At this time there are 3 attacks that can be simulated via this model by default
 - Force Destination (AttackButtonReq.py) - Forces the Elevator Car to always travel to a floor specified by the attacker regardless of the Car Button's recieved input.
 - "Infinite" Motor/Motor Burnout (AttackMotorRun.py) - Forces the elevator car to a non existent floor specified by the attacker, and simultaneously blocks any messages telling the motor to stop running. The result is that the Car Controller will claim to reach the non existent floor, but the motor will never stop causing the car to "crash". Coincidentally this **WILL** cause the simulation to hang, execute with caution.
 
-
-<img src="mitre-logo.png" width=250/>
-<br/>
-<img src="csu-logo.png" width=250/>
-
+<p align="middle">
+<img src="mitre-logo.png" width=250/>&nbsp&nbsp&nbsp&nbsp&nbsp<img src="csu-logo.png" width=250/>
+</p>
 The above logos used are property of Columbus State University and The MITRE Corporation respectively. These entities provided the opportunity to research the topic of Cyber Effects on Cyber Physical Systems that yielded this open source elevator simulation project. All credit for creating and providing the logical design specification included in this repository goes to the authors/researchers at The MITRE Corporation.
