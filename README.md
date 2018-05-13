@@ -1,6 +1,10 @@
 # ElevatorSim
 A functional model of an elevator written in python used to conduct research about Cyber Attacks/Effects on CPS
 
+### Author(s)
+- Cody Greene
+- Casey Erdmann
+
 ## How to Run the Simulator
 
 To run the simulation simply execute the following:
