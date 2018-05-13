@@ -42,4 +42,4 @@ At this time there are 3 attacks that can be simulated via this model by default
 <p align="middle">
 <img src="mitre-logo.png" width=250/>&nbsp&nbsp&nbsp&nbsp&nbsp<img src="csu-logo.png" width=250/>
 </p>
-The above logos used are property of Columbus State University and The MITRE Corporation respectively. These entities provided the opportunity to research the topic of Cyber Effects on Cyber Physical Systems that yielded this open source elevator simulation project. All credit for creating and providing the logical design specification included in this repository goes to the authors/researchers at The MITRE Corporation.
+The above logos used are property of The MITRE Corporation and Columbus State University respectively. These entities provided the opportunity to research the topic of Cyber Effects on Cyber Physical Systems that yielded this open source elevator simulation project. All credit for creating and providing the logical design specification included in this repository goes to the authors/researchers at The MITRE Corporation.
